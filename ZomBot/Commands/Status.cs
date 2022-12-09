@@ -21,7 +21,7 @@ namespace ZomBot.Commands {
 
             embed.WithCurrentTimestamp()
                 .WithAuthor(user ?? Context.User)
-                .AddField("**Player Data**", $"Team: {target.playerData.team}\n# of Tags: {target.playerData?.humansTagged ?? 0}\n{Warnings}Playing: {((target.playerData.name ?? "") == "" ? "false" : "true")}");
+                .AddField("**Player Data**", $"Name: {target.playerData.name}\nTeam: {target.playerData.team}\n# of Tags: {target.playerData?.humansTagged ?? 0}\n{Warnings}");
 
             await RespondAsync(embed: embed.Build(), ephemeral: true);
         }

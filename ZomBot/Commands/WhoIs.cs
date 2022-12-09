@@ -5,7 +5,7 @@ using ZomBot.Data;
 
 namespace ZomBot.Commands {
     public class WhoIs : InteractionModuleBase {
-        [SlashCommand("whois", "See a player's hvz related information.")]
+        [SlashCommand("whois", "Check a player's name.")]
         [UserCommand("Whois")]
         [RequireContext(ContextType.Guild)]
         public async Task WhoIsCommand([Summary("User", "Who to check.")] SocketUser user) {

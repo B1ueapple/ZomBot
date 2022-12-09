@@ -37,7 +37,7 @@ namespace ZomBot.Data {
         public string prefix; // command prefix default $
         public string hvzwebsite; // website for hvz must start with 'https://' to work and be the full website including .com .org etc.
         public int cachesize; // default 1000, seems fine
-        public string apikey; // get api key at '{website}/api/v2/auth/apikey' more api info available at https://github.com/redxdev/hvzsite/
+        public string apikey; // get api key at '{website}/api/v2/auth/apikey' more api info available at https://github.com/redxdev/hvzsite
         public bool apionline; // set this to true to enable automagic role updating. if website is not up, can cause exceptions
     }
 }

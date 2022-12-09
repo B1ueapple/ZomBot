@@ -3,24 +3,6 @@ using System.Text.RegularExpressions;
 
 namespace ZomBot.Resources {
     class Formatting {
-        public static string RemovePunctuation(string str) {
-            return str.Replace(" ", String.Empty).Replace(",", String.Empty)
-                      .Replace("'", String.Empty).Replace("[", String.Empty)
-                      .Replace("]", String.Empty).Replace("{", String.Empty)
-                      .Replace("}", String.Empty).Replace("(", String.Empty)
-                      .Replace(")", String.Empty).Replace("-", String.Empty)
-                      .Replace("=", String.Empty).Replace("+", String.Empty)
-                      .Replace("_", String.Empty).Replace("'", String.Empty)
-                      .Replace("`", String.Empty).Replace("#", String.Empty)
-                      .Replace("$", String.Empty).Replace("%", String.Empty)
-                      .Replace("^", String.Empty).Replace("&", String.Empty)
-                      .Replace("*", String.Empty).Replace("@", String.Empty)
-                      .Replace("!", String.Empty).Replace(";", String.Empty)
-                      .Replace(":", String.Empty).Replace("?", String.Empty)
-                      .Replace("<", String.Empty).Replace(">", String.Empty)
-                      .Replace(".", String.Empty).Replace("|", String.Empty)
-                      .Replace("\\", String.Empty).Replace("\"", String.Empty);
-        }
 
         public static string HtmlToPlainText(string html) {
             const string tagWhiteSpace = @"(>|$)(\W|\n|\r)+<"; //matches one or more (white space or line breaks) between '>' and '<'

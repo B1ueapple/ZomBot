@@ -8,7 +8,7 @@ namespace ZomBot.Commands {
     public class Warn : InteractionModuleBase {
         [SlashCommand("warn", "Warn a user.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild)]
+        [DefaultMemberPermissions(GuildPermission.KickMembers)]
         public async Task WarnCommand([Summary("User", "Who to warn.")] SocketUser user, [Summary("Reason", "Why the warning was issued")] string reason) {
             var account = Accounts.GetUser(user, Context.Guild);
             account.AddWarning(Context.User, reason);
@@ -19,7 +19,7 @@ namespace ZomBot.Commands {
 
         [UserCommand("Warnings")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild)]
+        [DefaultMemberPermissions(GuildPermission.KickMembers)]
         public async Task WarningsCommand([Summary("User", "Who to check.")] SocketUser user) {
             var account = Accounts.GetUser(user, Context.Guild);
             EmbedBuilder embed = new EmbedBuilder();

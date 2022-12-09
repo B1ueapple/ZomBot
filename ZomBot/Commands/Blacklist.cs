@@ -8,7 +8,7 @@ namespace ZomBot.Commands {
     public class Blacklist : InteractionModuleBase {
         [SlashCommand("blacklist", "Toggles whether or not Zombot will automagically update a specific user.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild)]
+        [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         public async Task BlacklistCommand([Summary("User", "Who to modify.")] SocketUser user, [Summary("Status", "What to set their status to. (Defaults to true)")] bool set = true) {
             var account = Accounts.GetUser(user, Context.Guild);
             account.blacklisted = set;

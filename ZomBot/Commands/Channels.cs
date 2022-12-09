@@ -9,7 +9,7 @@ namespace ZomBot.Commands {
     public class Channels : InteractionModuleBase {
         [SlashCommand("zc", "Set the current channel as a zombie text channel.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild), RequireBotPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task SetZombieChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);
@@ -49,7 +49,7 @@ namespace ZomBot.Commands {
 
         [SlashCommand("hc", "Set the current channel as a human text channel.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild), RequireBotPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task SetHumanChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);
@@ -89,7 +89,7 @@ namespace ZomBot.Commands {
         
         [SlashCommand("mc", "Set the current channel as a mod text channel.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild), RequireBotPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task SetModChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);
@@ -129,7 +129,7 @@ namespace ZomBot.Commands {
         
         [SlashCommand("gac", "Set the current channel as the general announcement channel.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild), RequireBotPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task SetGeneralAnnouncementChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);
@@ -169,7 +169,7 @@ namespace ZomBot.Commands {
         
         [SlashCommand("zac", "Set the current channel as the zombie announcement channel.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild), RequireBotPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task SetZombieAnnouncementChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);
@@ -209,7 +209,7 @@ namespace ZomBot.Commands {
         
         [SlashCommand("hac", "Set the current channel as the human announcement channel.")]
         [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageGuild), RequireBotPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task SetHumanAnnouncementChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);

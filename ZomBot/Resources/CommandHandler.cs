@@ -28,8 +28,6 @@ namespace ZomBot.Resources {
             if (context.Guild != null) {
                 int argPos = 0;
 
-                string formattedMSG = Formatting.RemovePunctuation(msg.Content.ToLower());
-
                 if (msg.HasStringPrefix(Config.bot.prefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
                     var result = await _service.ExecuteAsync(context, argPos, null);
 

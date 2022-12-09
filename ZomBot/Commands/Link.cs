@@ -72,7 +72,16 @@ namespace ZomBot.Commands {
         [RequireContext(ContextType.Guild)]
         public async Task UnlinkCommand([Summary("User", "The discord user to unlink. (Defaults to yourself)")] SocketUser user = null) {
             if (Context.Guild is SocketGuild guild) {
-                var ud = Accounts.GetUser((user ?? Context.User).Id, guild.Id);
+                if (user != null) {
+                    var sender = await Context.Guild.GetUserAsync(Context.User.Id);
+
+                    if (!sender.GuildPermissions.ManageRoles) {
+                        await RespondAsync(":x: You don't have permission to do that :x:", ephemeral: true);
+                        return;
+                    }
+                }
+
+                var ud = Accounts.GetUser(user ?? Context.User, guild);
 
                 if (ud.playerData.name != null && ud.playerData.name != "") {
                     PlayerData p = new PlayerData {
