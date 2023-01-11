@@ -110,6 +110,7 @@
     <Compile Include="Commands\ClanColor.cs" />
     <Compile Include="Commands\Blacklist.cs" />
     <Compile Include="Commands\Channels.cs" />
+    <Compile Include="Commands\EndGame.cs" />
     <Compile Include="Commands\Link.cs" />
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Warn.cs" />

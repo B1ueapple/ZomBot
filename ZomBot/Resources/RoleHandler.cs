@@ -7,298 +7,652 @@ using System.Threading.Tasks;
 using ZomBot.Data;
 
 namespace ZomBot.Resources {
-    public class RoleHandler {
-        public static async Task CreateClanRole(SocketGuild guild, string clanName) {
-            var guildAccount = Accounts.GetGuild(guild);
+	public class RoleHandler {
+		public static async Task CreateClanRole(SocketGuild guild, string clanName) {
+			var guildAccount = Accounts.GetGuild(guild);
 
-            if (guildAccount.clanList == null) {
-                guildAccount.clanList = new List<Clan>();
-                Accounts.SaveAccounts();
+			if (guildAccount.clanList == null) {
+				guildAccount.clanList = new List<Clan>();
+				Accounts.SaveAccounts();
+			}
+
+			foreach (Clan c in guildAccount.clanList)
+				if (c.clanName.ToLower().Contains(clanName.ToLower()))
+					return;
+
+			SocketRole humanRole = guild.GetRole(guildAccount.roleIDs.human);
+
+			var rand = new Random();
+			uint color = (uint)rand.Next(0, 0xffffff);
+
+			ulong r = (await guild.CreateRoleAsync(clanName, color: color, isHoisted: false, isMentionable: true)).Id;
+			await guild.GetRole(r).ModifyAsync(x => x.Position = humanRole.Position + 1);
+
+			guildAccount.clanList.Add(new Clan() {
+				clanName = clanName,
+				roleID = r
+			});
+
+			Console.WriteLine($"Created new role for clan: {clanName}");
+
+			Accounts.SaveAccounts();
+		}
+
+		public static async Task CreateRoles(SocketGuild guild, bool endgame = false) {
+			var guildAccount = Accounts.GetGuild(guild);
+			bool updated = false;
+			var roles = guild.Roles;
+
+			if (!endgame) { // mod role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.mod select r;
+				var role = temprole.FirstOrDefault();
+
+				if (role == null) {
+					guildAccount.roleIDs.mod = (await guild.CreateRoleAsync("Mod", color: Color.Blue, isHoisted: true, isMentionable: true)).Id;
+					Console.WriteLine("Created new mod role.");
+					updated = true;
+				}
+			}
+
+			if (!endgame) { // mvz role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.mvz select r;
+				var role = temprole.FirstOrDefault();
+
+				if (role == null) {
+					guildAccount.roleIDs.mvz = (await guild.CreateRoleAsync("MVZ", color: Color.DarkGreen, isHoisted: true, isMentionable: true)).Id;
+					Console.WriteLine("Created new mvz role.");
+					updated = true;
+				}
             }
 
-            foreach (Clan c in guildAccount.clanList)
-                if (c.clanName.ToLower().Contains(clanName.ToLower()))
-                    return;
+			if (!endgame) { // oz role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.oz select r;
+				var role = temprole.FirstOrDefault();
 
-            SocketRole humanRole = guild.GetRole(guildAccount.roleIDs.human);
+				if (role == null) {
+					guildAccount.roleIDs.oz = (await guild.CreateRoleAsync("OZ", color: new Color(0x1B7D44), isHoisted: true, isMentionable: true)).Id;
+					Console.WriteLine("Created new oz role.");
+					updated = true;
+				}
+			}
 
-            var rand = new Random();
-            uint color = (uint)rand.Next(0, 0xffffff);
+			if (!endgame) { // zombie role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.zombie select r;
+				var role = temprole.FirstOrDefault();
 
-            ulong r = (await guild.CreateRoleAsync(clanName, color: color, isHoisted: false, isMentionable: true)).Id;
-            await guild.GetRole(r).ModifyAsync(x => x.Position = humanRole.Position + 1);
+				if (role == null) {
+					guildAccount.roleIDs.zombie = (await guild.CreateRoleAsync("Zombie", color: Color.Green, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new zombie role.");
+					updated = true;
+				}
+			}
 
-            guildAccount.clanList.Add(new Clan() {
-                clanName = clanName,
-                roleID = r
-            });
+			if (!endgame) { // human role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.human select r;
+				var role = temprole.FirstOrDefault();
 
-            Console.WriteLine($"Created new role for clan: {clanName}");
+				if (role == null) {
+					guildAccount.roleIDs.human = (await guild.CreateRoleAsync("Human", color: Color.LightOrange, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new human role.");
+					updated = true;
+				}
+			}
 
-            Accounts.SaveAccounts();
-        }
+			{ // veteranmod role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.veteranmod select r;
+				var role = temprole.FirstOrDefault();
 
-        public static async void CreateRoles(SocketGuild guild) {
-            var guildAccount = Accounts.GetGuild(guild);
-            bool updated = false;
-            
-            if (guild.GetRole(guildAccount.roleIDs.mod) == null) {
-                var modRole = await guild.CreateRoleAsync("Mod", color: Color.Blue, isHoisted: true, isMentionable: true);
+				if (guild.GetRole(guildAccount.roleIDs.veteranmod) == null) {
+					guildAccount.roleIDs.veteranmod = (await guild.CreateRoleAsync("Veteran Mod", color: Color.DarkBlue, isHoisted: true, isMentionable: true)).Id;
+					Console.WriteLine("Created new veteranmod role.");
+					updated = true;
+				}
+			}
 
-                guildAccount.roleIDs.mod = modRole.Id;
-                Console.WriteLine("Created new mod role.");
-                updated = true;
-            }
+			{ // survivor role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survivor select r;
+				var role = temprole.FirstOrDefault();
 
-            if (guild.GetRole(guildAccount.roleIDs.mvz) == null) {
-                guildAccount.roleIDs.mvz = (await guild.CreateRoleAsync("MVZ", color: Color.DarkGreen, isHoisted: true, isMentionable: true)).Id;
-                Console.WriteLine("Created new mvz role.");
-                updated = true;
-            }
+				if (role == null) {
+					guildAccount.roleIDs.survivor = (await guild.CreateRoleAsync("Survivor", color: Color.Magenta, isHoisted: true, isMentionable: true)).Id;
+					Console.WriteLine("Created new survivor role.");
+					updated = true;
+				}
+			}
 
-            if (guild.GetRole(guildAccount.roleIDs.zombie) == null) {
-                guildAccount.roleIDs.zombie = (await guild.CreateRoleAsync("Zombie", color: Color.Green, isHoisted: false, isMentionable: true)).Id;
-                Console.WriteLine("Created new zombie role.");
-                updated = true;
-            }
+			{ // survived4 role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived4 select r;
+				var role = temprole.FirstOrDefault();
 
-            if (guild.GetRole(guildAccount.roleIDs.human) == null) {
-                guildAccount.roleIDs.human = (await guild.CreateRoleAsync("Human", color: Color.LightOrange, isHoisted: false, isMentionable: true)).Id;
-                Console.WriteLine("Created new human role.");
-                updated = true;
-            }
+				if (role == null) {
+					guildAccount.roleIDs.survived4 = (await guild.CreateRoleAsync("Survived 4 Days", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new survived4 role.");
+					updated = true;
+				}
+			}
 
-            if (guild.GetRole(guildAccount.roleIDs.player) == null) {
-                guildAccount.roleIDs.player = (await guild.CreateRoleAsync("Player", color: Color.Default, isHoisted: false, isMentionable: true)).Id;
-                Console.WriteLine("Created new player role.");
-                updated = true;
-            }
+			{ // survived3 role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived3 select r;
+				var role = temprole.FirstOrDefault();
 
-            if (updated)
-                Accounts.SaveAccounts();
-        }
+				if (role == null) {
+					guildAccount.roleIDs.survived3 = (await guild.CreateRoleAsync("Survived 3 Days", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new survived3 role.");
+					updated = true;
+				}
+			}
 
-        public static async Task JoinClan(IUser user, SocketGuild guild, string clanName) {
-            await CreateClanRole(guild, clanName);
-            var guildData = Accounts.GetGuild(guild.Id);
-            var userButInGuild = guild.GetUser(user.Id);
-            var roles = userButInGuild.Roles;
-            
-            foreach (Clan c in guildData.clanList) {
-                var role = guild.GetRole(c.roleID);
+			{ // survived2 role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived2 select r;
+				var role = temprole.FirstOrDefault();
 
-                if (roles.Contains(role)) {
-                    if (c.clanName.ToLower() != clanName.ToLower()) {
-                        await userButInGuild.RemoveRoleAsync(role);
-                    }
-                } else {
-                    if (c.clanName.ToLower() == clanName.ToLower()) {
-                        await userButInGuild.AddRoleAsync(role);
-                    }
-                }
-            }
-        }
+				if (role == null) {
+					guildAccount.roleIDs.survived2 = (await guild.CreateRoleAsync("Survived 2 Days", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new survived2 role.");
+					updated = true;
+				}
+			}
 
-        public static async Task LeaveClan(IUser user, SocketGuild guild) {
-            var guildData = Accounts.GetGuild(guild.Id);
-            var userButInGuild = guild.GetUser(user.Id);
-            var roles = userButInGuild.Roles;
+			{ // survived1 role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived1 select r;
+				var role = temprole.FirstOrDefault();
 
-            foreach (Clan c in guildData.clanList) {
-                var role = guild.GetRole(c.roleID);
+				if (role == null) {
+					guildAccount.roleIDs.survived1 = (await guild.CreateRoleAsync("Survived 1 Day", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new survived1 role.");
+					updated = true;
+				}
+			}
 
-                if (roles.Contains(role))
-                    await userButInGuild.RemoveRoleAsync(role);
-            }
-        }
+			if (!endgame) { // revived role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.revived select r;
+				var role = temprole.FirstOrDefault();
 
-        public static async Task JoinHumanTeam(IUser user, SocketGuild guild) {
-            CreateRoles(guild);
-            var guildData = Accounts.GetGuild(guild.Id);
-            var userButInGuild = guild.GetUser(user.Id);
-            bool addHuman = true, addPlayer = true;
+				if (role == null) {
+					guildAccount.roleIDs.revived = (await guild.CreateRoleAsync("Revived", color: Color.Orange, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new revived role.");
+					updated = true;
+				}
+			}
 
-            foreach (SocketRole role in userButInGuild.Roles) {
-                if (role.Id == guildData.roleIDs.mod)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
-                else if (role.Id == guildData.roleIDs.mvz)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
-                else if (role.Id == guildData.roleIDs.zombie)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
-                else if (role.Id == guildData.roleIDs.human)
-                    addHuman = false;
-                else if (role.Id == guildData.roleIDs.player)
-                    addPlayer = false;
-            }
+			if (!endgame) { // player role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.player select r;
+				var role = temprole.FirstOrDefault();
 
-            if (addHuman)
-                await userButInGuild.AddRoleAsync(guildData.roleIDs.human);
+				if (role == null) {
+					guildAccount.roleIDs.player = (await guild.CreateRoleAsync("Player", color: Color.Default, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new player role.");
+					updated = true;
+				}
+			}
 
-            if (addPlayer)
-                await userButInGuild.AddRoleAsync(guildData.roleIDs.player);
-        }
+			{ // veteran role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.veteran select r;
+				var role = temprole.FirstOrDefault();
 
-        public static async Task JoinZombieTeam(IUser user, SocketGuild guild, bool isMVZ = false) {
-            CreateRoles(guild);
-            var guildData = Accounts.GetGuild(guild.Id);
-            var userButInGuild = guild.GetUser(user.Id);
-            bool addZombie = true, addPlayer = true, addMVZ = true;
+				if (role == null) {
+					guildAccount.roleIDs.veteran = (await guild.CreateRoleAsync("Veteran", color: Color.Teal, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new veteran role.");
+					updated = true;
+				}
+			}
 
-            foreach (SocketRole role in userButInGuild.Roles) {
-                if (role.Id == guildData.roleIDs.mod)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
-                else if (role.Id == guildData.roleIDs.human)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
-                else if (role.Id == guildData.roleIDs.zombie)
-                    addZombie = false;
-                else if (role.Id == guildData.roleIDs.player)
-                    addPlayer = false;
-                else if (role.Id == guildData.roleIDs.mvz) {
-                    if (isMVZ)
-                        addMVZ = false;
-                    else
-                        await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
-                }
-            }
+			if (updated)
+				Accounts.SaveAccounts();
+		}
 
-            if (addZombie)
-                await userButInGuild.AddRoleAsync(guildData.roleIDs.zombie);
+		private static async Task DeleteRoles(SocketGuild guild) {
+			var guildAccount = Accounts.GetGuild(guild);
+			bool updated = false;
+			var roles = guild.Roles;
 
-            if (addPlayer)
-                await userButInGuild.AddRoleAsync(guildData.roleIDs.player);
+			{ // mod role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.mod select r;
+				var role = temprole.FirstOrDefault();
 
-            if (addMVZ && isMVZ)
-                await userButInGuild.AddRoleAsync(guildData.roleIDs.mvz);
-        }
+				if (role != null) {
+					guildAccount.roleIDs.mod = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted mod role.");
+					updated = true;
+				}
+			}
 
-        public static async Task JoinModTeam(IUser user, SocketGuild guild) {
-            CreateRoles(guild);
-            var guildData = Accounts.GetGuild(guild.Id);
-            var userButInGuild = guild.GetUser(user.Id);
-            bool addMod = true;
+			{ // mvz role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.mvz select r;
+				var role = temprole.FirstOrDefault();
 
-            foreach (SocketRole role in userButInGuild.Roles) {
-                if (role.Id == guildData.roleIDs.mod)
-                    addMod = false;
-                else if (role.Id == guildData.roleIDs.mvz)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
-                else if (role.Id == guildData.roleIDs.zombie)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
-                else if (role.Id == guildData.roleIDs.human)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
-                else if (role.Id == guildData.roleIDs.player)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.player);
-            }
+				if (role != null) {
+					guildAccount.roleIDs.mvz = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted mvz role.");
+					updated = true;
+				}
+			}
 
-            if (addMod)
-                await userButInGuild.AddRoleAsync(guildData.roleIDs.mod);
-        }
+			{ // oz role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.oz select r;
+				var role = temprole.FirstOrDefault();
 
-        public static async Task LeaveTeams(IUser user, SocketGuild guild) {
-            CreateRoles(guild);
-            var guildData = Accounts.GetGuild(guild.Id);
-            var userButInGuild = guild.GetUser(user.Id);
+				if (role != null) {
+					guildAccount.roleIDs.oz = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted oz role.");
+					updated = true;
+				}
+			}
 
-            foreach (SocketRole role in userButInGuild.Roles) {
-                if (role.Id == guildData.roleIDs.mod)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
-                else if (role.Id == guildData.roleIDs.mvz)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
-                else if (role.Id == guildData.roleIDs.zombie)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
-                else if (role.Id == guildData.roleIDs.human)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
-                else if (role.Id == guildData.roleIDs.player)
-                    await userButInGuild.RemoveRoleAsync(guildData.roleIDs.player);
-            }
-        }
+			{ // zombie role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.zombie select r;
+				var role = temprole.FirstOrDefault();
 
-        public static async void UpdateChannel(ulong channelID, SocketGuild guild) {
-            CreateRoles(guild);
-            var guildAccount = Accounts.GetGuild(guild);
-            List<ulong> remove = new List<ulong>();
+				if (role != null) {
+					guildAccount.roleIDs.zombie = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted zombie role.");
+					updated = true;
+				}
+			}
 
-            OverwritePermissions permsNoSee = new OverwritePermissions(viewChannel: PermValue.Deny);
-            OverwritePermissions permsSeeNoSpeak = new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny);
-            OverwritePermissions permsSee = new OverwritePermissions(viewChannel: PermValue.Allow);
+			{ // human role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.human select r;
+				var role = temprole.FirstOrDefault();
 
-            if (channelID == guildAccount.channels.generalAnnouncementChannel) { // general announcement channel check
-                var channel = guild.GetTextChannel(channelID);
+				if (role != null) {
+					guildAccount.roleIDs.human = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted human role.");
+					updated = true;
+				}
+			}
 
-                if (channel != null) {
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSeeNoSpeak);
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSeeNoSpeak);
-                    await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-                    return;
-                }
-            }
+			{ // revived role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.revived select r;
+				var role = temprole.FirstOrDefault();
 
-            if (channelID == guildAccount.channels.humanAnnouncementChannel) { // human announcement channel check
-                var channel = guild.GetTextChannel(channelID);
+				if (role != null) {
+					guildAccount.roleIDs.revived = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted revived role.");
+					updated = true;
+				}
+			}
 
-                if (channel != null) {
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSeeNoSpeak);
-                    await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-                    return;
-                }
-            }
+			{ // player role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.player select r;
+				var role = temprole.FirstOrDefault();
 
-            if (channelID == guildAccount.channels.zombieAnnouncementChannel) { // zombie announcement channel check
-                var channel = guild.GetTextChannel(channelID);
+				if (role != null) {
+					guildAccount.roleIDs.player = 0;
+					await guild.GetRole(role.Id).DeleteAsync();
+					Console.WriteLine("Deleted player role.");
+					updated = true;
+				}
+			}
 
-                if (channel != null) {
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSeeNoSpeak);
-                    await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-                    return;
-                }
-            }
+			if (updated)
+				Accounts.SaveAccounts();
+		}
 
-            { // Check mod channels
-                var result = from a in guildAccount.channels.modChannels
-                             where a == channelID
-                             select a;
+		public static async Task JoinClan(IUser user, SocketGuild guild, string clanName) {
+			await CreateClanRole(guild, clanName);
+			var guildData = Accounts.GetGuild(guild.Id);
+			var userButInGuild = guild.GetUser(user.Id);
+			var roles = userButInGuild.Roles;
+			
+			foreach (Clan c in guildData.clanList) {
+				var role = guild.GetRole(c.roleID);
 
-                var channel = guild.GetTextChannel(result.FirstOrDefault());
+				if (roles.Contains(role)) {
+					if (c.clanName.ToLower() != clanName.ToLower()) {
+						await userButInGuild.RemoveRoleAsync(role);
+					}
+				} else {
+					if (c.clanName.ToLower() == clanName.ToLower()) {
+						await userButInGuild.AddRoleAsync(role);
+					}
+				}
+			}
+		}
 
-                if (channel != null) {
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-                    return;
-                }
-            }
+		public static async Task LeaveClan(IUser user, SocketGuild guild) {
+			var guildData = Accounts.GetGuild(guild.Id);
+			var userButInGuild = guild.GetUser(user.Id);
+			var roles = userButInGuild.Roles;
 
-            { // Check human channels
-                var result = from a in guildAccount.channels.humanChannels
-                             where a == channelID
-                             select a;
+			foreach (Clan c in guildData.clanList) {
+				var role = guild.GetRole(c.roleID);
 
-                var channel = guild.GetTextChannel(result.FirstOrDefault());
+				if (roles.Contains(role))
+					await userButInGuild.RemoveRoleAsync(role);
+			}
+		}
 
-                if (channel != null) {
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-                    return;
-                }
-            }
+		public static async Task JoinHumanTeam(IUser user, SocketGuild guild) {
+			await CreateRoles(guild);
+			var guildData = Accounts.GetGuild(guild.Id);
+			var userButInGuild = guild.GetUser(user.Id);
+			bool addHuman = true, addPlayer = true;
 
-            { // Check zombie channels
-                var result = from a in guildAccount.channels.zombieChannels
-                             where a == channelID
-                             select a;
+			foreach (SocketRole role in userButInGuild.Roles) {
+				if (role.Id == guildData.roleIDs.mod)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
+				else if (role.Id == guildData.roleIDs.mvz)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
+				else if (role.Id == guildData.roleIDs.zombie)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
+				else if (role.Id == guildData.roleIDs.human)
+					addHuman = false;
+				else if (role.Id == guildData.roleIDs.player)
+					addPlayer = false;
+			}
 
-                var channel = guild.GetTextChannel(result.FirstOrDefault());
+			if (addHuman)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.human);
 
-                if (channel != null) {
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSee);
-                    await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-                    return;
-                }
-            }
-        }
-    }
+			if (addPlayer)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.player);
+		}
+
+		public static async Task JoinZombieTeam(IUser user, SocketGuild guild, bool isMVZ = false) {
+			await CreateRoles (guild);
+			var guildData = Accounts.GetGuild(guild.Id);
+			var userButInGuild = guild.GetUser(user.Id);
+			bool addZombie = true, addPlayer = true, addMVZ = true;
+
+			foreach (SocketRole role in userButInGuild.Roles) {
+				if (role.Id == guildData.roleIDs.mod)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
+				else if (role.Id == guildData.roleIDs.human)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
+				else if (role.Id == guildData.roleIDs.zombie)
+					addZombie = false;
+				else if (role.Id == guildData.roleIDs.player)
+					addPlayer = false;
+				else if (role.Id == guildData.roleIDs.mvz) {
+					if (isMVZ)
+						addMVZ = false;
+					else
+						await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
+				}
+			}
+
+			if (addZombie)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.zombie);
+
+			if (addPlayer)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.player);
+
+			if (addMVZ && isMVZ)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.mvz);
+		}
+
+		public static async Task JoinModTeam(IUser user, SocketGuild guild) {
+			await CreateRoles (guild);
+			var guildData = Accounts.GetGuild(guild.Id);
+			var userButInGuild = guild.GetUser(user.Id);
+			bool addMod = true;
+
+			foreach (SocketRole role in userButInGuild.Roles) {
+				if (role.Id == guildData.roleIDs.mod)
+					addMod = false;
+				else if (role.Id == guildData.roleIDs.mvz)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
+				else if (role.Id == guildData.roleIDs.zombie)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
+				else if (role.Id == guildData.roleIDs.human)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
+				else if (role.Id == guildData.roleIDs.player)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.player);
+			}
+
+			if (addMod)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.mod);
+		}
+
+		public static async Task LeaveTeams(IUser user, SocketGuild guild) {
+			await CreateRoles (guild);
+			var guildData = Accounts.GetGuild(guild.Id);
+			var userButInGuild = guild.GetUser(user.Id);
+
+			foreach (SocketRole role in userButInGuild.Roles) {
+				if (role.Id == guildData.roleIDs.mod)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
+				else if (role.Id == guildData.roleIDs.mvz)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
+				else if (role.Id == guildData.roleIDs.zombie)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
+				else if (role.Id == guildData.roleIDs.human)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
+				else if (role.Id == guildData.roleIDs.player)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.player);
+			}
+		}
+
+		public static async void UpdateChannel(ulong channelID, SocketGuild guild) {
+			await CreateRoles (guild);
+			var guildAccount = Accounts.GetGuild(guild);
+			List<ulong> remove = new List<ulong>();
+
+			OverwritePermissions permsNoSee = new OverwritePermissions(viewChannel: PermValue.Deny);
+			OverwritePermissions permsSeeNoSpeak = new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny);
+			OverwritePermissions permsSee = new OverwritePermissions(viewChannel: PermValue.Allow);
+
+			if (channelID == guildAccount.channels.generalAnnouncementChannel) { // general announcement channel check
+				var channel = guild.GetTextChannel(channelID);
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+
+			if (channelID == guildAccount.channels.humanAnnouncementChannel) { // human announcement channel check
+				var channel = guild.GetTextChannel(channelID);
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+
+			if (channelID == guildAccount.channels.zombieAnnouncementChannel) { // zombie announcement channel check
+				var channel = guild.GetTextChannel(channelID);
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+
+			{ // Check mod channels
+				var result = from a in guildAccount.channels.modChannels
+							 where a == channelID
+							 select a;
+
+				var channel = guild.GetTextChannel(result.FirstOrDefault());
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+
+			{ // Check human channels
+				var result = from a in guildAccount.channels.humanChannels
+							 where a == channelID
+							 select a;
+
+				var channel = guild.GetTextChannel(result.FirstOrDefault());
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+
+			{ // Check zombie channels
+				var result = from a in guildAccount.channels.zombieChannels
+							 where a == channelID
+							 select a;
+
+				var channel = guild.GetTextChannel(result.FirstOrDefault());
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+		}
+
+		public static async void EndGame(SocketGuild guild, bool survivors) {
+			await CreateRoles(guild, true);
+			await DeleteRoles(guild);
+			var guildAccount = Accounts.GetGuild(guild);
+			List<ulong> remove = new List<ulong>();
+
+			OverwritePermissions permsNoSee = new OverwritePermissions(viewChannel: PermValue.Deny);
+			OverwritePermissions permsSeeNoSpeak = new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny);
+			OverwritePermissions permsSee = new OverwritePermissions(viewChannel: PermValue.Allow);
+
+			var channels = guild.TextChannels;
+			var roles = guild.Roles;
+			IEnumerable<SocketRole> temprole;
+
+			temprole = from r in roles where r.Id == guildAccount.roleIDs.veteranmod select r;
+			var vetmodrole = temprole.FirstOrDefault();
+
+			temprole = from r in roles where r.Id == guildAccount.roleIDs.veteran select r;
+			var vetrole = temprole.FirstOrDefault();
+
+			// update all game channels for post game roles
+			{
+				var tempchannel = from c in channels where c.Id == guildAccount.channels.generalAnnouncementChannel select c;
+				var channel = tempchannel.FirstOrDefault();
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(vetmodrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
+			}
+
+			{
+				var tempchannel = from c in channels where c.Id == guildAccount.channels.humanAnnouncementChannel select c;
+				var channel = tempchannel.FirstOrDefault();
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(vetmodrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
+			}
+
+			{
+				var tempchannel = from c in channels where c.Id == guildAccount.channels.zombieAnnouncementChannel select c;
+				var channel = tempchannel.FirstOrDefault();
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(vetmodrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
+			}
+
+			foreach (ulong channelID in guildAccount.channels.modChannels) {
+				var tempchannel = from c in channels
+							 where c.Id == channelID
+							 select c;
+
+				var channel = tempchannel.FirstOrDefault();
+				if (channel == null)
+					continue;
+
+				if (channel == null)
+					continue;
+
+				await channel.AddPermissionOverwriteAsync(vetmodrole, permsSee);
+				await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+			}
+
+			foreach (ulong channelID in guildAccount.channels.humanChannels) {
+				var tempchannel = from c in channels
+								  where c.Id == channelID
+								  select c;
+
+				var channel = tempchannel.FirstOrDefault();
+				if (channel == null)
+					continue;
+
+				if (channel == null)
+					continue;
+
+				await channel.AddPermissionOverwriteAsync(vetmodrole, permsSeeNoSpeak);
+				await channel.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+				await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+			}
+
+			foreach (ulong channelID in guildAccount.channels.zombieChannels) {
+				var tempchannel = from c in channels
+								  where c.Id == channelID
+								  select c;
+
+				var channel = tempchannel.FirstOrDefault();
+				if (channel == null)
+					continue;
+
+				if (channel == null)
+					continue;
+
+				await channel.AddPermissionOverwriteAsync(vetmodrole, permsSeeNoSpeak);
+				await channel.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+				await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+			}
+
+			guildAccount.channels.generalAnnouncementChannel = 0;
+			guildAccount.channels.humanAnnouncementChannel = 0;
+			guildAccount.channels.zombieAnnouncementChannel = 0;
+			guildAccount.channels.modChannels = new List<ulong>();
+			guildAccount.channels.humanChannels = new List<ulong>();
+			guildAccount.channels.zombieChannels = new List<ulong>();
+
+			// add postgame channels
+			var category = await guild.CreateCategoryChannelAsync("Post Game");
+
+			var pac = await guild.CreateTextChannelAsync("postgame-announcements");
+			await pac.ModifyAsync(x => x.CategoryId = category.Id);
+			await pac.AddPermissionOverwriteAsync(vetmodrole, permsSee);
+			await pac.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+			await pac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+			guildAccount.channels.postgameAnnouncementsChannel = pac.Id;
+
+			var cc = await guild.CreateTextChannelAsync("criticisms");
+			await cc.ModifyAsync(x => x.CategoryId = category.Id);
+			await cc.AddPermissionOverwriteAsync(vetmodrole, permsSee);
+			await cc.AddPermissionOverwriteAsync(vetrole, permsSee);
+			await cc.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+			guildAccount.channels.criticismsChannel = cc.Id;
+
+			var ac = await guild.CreateTextChannelAsync("afterthoughts");
+			await ac.ModifyAsync(x => x.CategoryId = category.Id);
+			await ac.AddPermissionOverwriteAsync(vetmodrole, permsSee);
+			await ac.AddPermissionOverwriteAsync(vetrole, permsSee);
+			await ac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+			guildAccount.channels.afterthoughtsChannel = ac.Id;
+
+			Accounts.SaveAccounts();
+		}
+	}
 }

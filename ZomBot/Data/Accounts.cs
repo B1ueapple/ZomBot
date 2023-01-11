@@ -101,8 +101,8 @@ namespace ZomBot.Data {
                     missions = new List<MissionData>()
                 },
                 setupComplete = false,
-                chatFilter = false,
-                clanList = new List<Clan>()
+                clanList = new List<Clan>(),
+                gameActive = true
             };
 
             guildAccounts.Add(newAccount);

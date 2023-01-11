@@ -178,6 +178,8 @@ namespace ZomBot {
             if (_client.Guilds.Count > 0) {
                 foreach (SocketGuild guild in _client.Guilds) {
                     var g = Accounts.GetGuild(guild);
+                    if (!g.gameActive)
+                        continue;
 
                     int mvznum = 0;
                     int numZombies = 0;
