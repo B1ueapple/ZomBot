@@ -29,7 +29,6 @@ namespace ZomBot.Data {
     }
 
     public struct SpecialPlayerData {
-        public bool oz;
         public bool revived;
     }
     

@@ -44,10 +44,6 @@ namespace ZomBot.Data {
 
 		public List<ulong> modChannels;				// set manually by admin (bot manages perms automagically)
 		public ulong logChannel;					// set manually by admin (bot manages perms automagically)
-
-		public ulong postgameAnnouncementsChannel;	// created after game by bot
-		public ulong afterthoughtsChannel;			// created after game by bot
-		public ulong criticismsChannel;				// created after game by bot
 	}
 
 	public struct MissionData { // cannot be changed - based on website api

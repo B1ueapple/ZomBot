@@ -8,7 +8,7 @@ namespace ZomBot.Commands {
 		[SlashCommand("startgame", "Start the game. (Doesn't affect the website)")]
 		[RequireContext(ContextType.Guild)]
 		[DefaultMemberPermissions(GuildPermission.ManageGuild)]
-		public async Task EndGameCommand([Summary("Survivors", "If there were survivors. (Setting to false will ensure everyone \"dies\" on the last day.)")] bool survivors) {
+		public async Task StartGameCommand() {
 			var account = Accounts.GetUser(Context.User, Context.Guild);
 
 			if (!(account.playerData.access == "mod" || account.playerData.access == "admin" || account.playerData.access == "superadmin")) {
@@ -17,10 +17,17 @@ namespace ZomBot.Commands {
 			}
 
 			var guildAccount = Accounts.GetGuild(Context.Guild);
+
+			if (!guildAccount.gameData.active) {
+				await RespondAsync(":x: Game already ongoing :x:", ephemeral: true);
+				return;
+			}
+
 			guildAccount.gameData.active = true;
 			guildAccount.gameData.startTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
+			Accounts.SaveAccounts();
 
-			await RespondAsync(":thumbsup: The server has been updated to reflect the game ending :thumbsup:", ephemeral: true);
+			await RespondAsync(":thumbsup: The game has been marked as started :thumbsup:", ephemeral: true);
 		}
 	}
 }

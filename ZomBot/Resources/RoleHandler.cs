@@ -63,17 +63,6 @@ namespace ZomBot.Resources {
 					Console.WriteLine("Created new mvz role.");
 					updated = true;
 				}
-            }
-
-			if (!endgame) { // oz role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.oz select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role == null) {
-					guildAccount.roleIDs.oz = (await guild.CreateRoleAsync("OZ", color: new Color(0x1B7D44), isHoisted: true, isMentionable: true)).Id;
-					Console.WriteLine("Created new oz role.");
-					updated = true;
-				}
 			}
 
 			if (!endgame) { // zombie role
@@ -159,7 +148,6 @@ namespace ZomBot.Resources {
 
 		private static async Task DeleteRoles(SocketGuild guild) {
 			var guildAccount = Accounts.GetGuild(guild);
-			bool updated = false;
 			var roles = guild.Roles;
 
 			{ // mod role
@@ -170,7 +158,6 @@ namespace ZomBot.Resources {
 					guildAccount.roleIDs.mod = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted mod role.");
-					updated = true;
 				}
 			}
 
@@ -182,19 +169,6 @@ namespace ZomBot.Resources {
 					guildAccount.roleIDs.mvz = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted mvz role.");
-					updated = true;
-				}
-			}
-
-			{ // oz role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.oz select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role != null) {
-					guildAccount.roleIDs.oz = 0;
-					await guild.GetRole(role.Id).DeleteAsync();
-					Console.WriteLine("Deleted oz role.");
-					updated = true;
 				}
 			}
 
@@ -206,7 +180,6 @@ namespace ZomBot.Resources {
 					guildAccount.roleIDs.zombie = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted zombie role.");
-					updated = true;
 				}
 			}
 
@@ -218,7 +191,6 @@ namespace ZomBot.Resources {
 					guildAccount.roleIDs.human = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted human role.");
-					updated = true;
 				}
 			}
 
@@ -230,7 +202,6 @@ namespace ZomBot.Resources {
 					guildAccount.roleIDs.revived = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted revived role.");
-					updated = true;
 				}
 			}
 
@@ -242,24 +213,46 @@ namespace ZomBot.Resources {
 					guildAccount.roleIDs.player = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted player role.");
-					updated = true;
 				}
 			}
 
-			if (updated)
-				Accounts.SaveAccounts();
+			foreach (Clan c in guildAccount.clanList) {
+				var result = from r in roles
+							 where r.Id == c.roleID
+							 select r;
+
+				var role = result.FirstOrDefault();
+				if (role == null)
+					continue;
+
+				await role.DeleteAsync();
+			}
+
+			guildAccount.clanList = new List<Clan>();
+
+			Accounts.SaveAccounts();
 		}
 
 		public static async Task JoinClan(IUser user, SocketGuild guild, string clanName) {
 			await CreateClanRole(guild, clanName);
 			var guildData = Accounts.GetGuild(guild.Id);
 			var userButInGuild = guild.GetUser(user.Id);
-			var roles = userButInGuild.Roles;
-			
-			foreach (Clan c in guildData.clanList) {
-				var role = guild.GetRole(c.roleID);
+			var userRoles = userButInGuild.Roles;
+			var roles = guild.Roles;
 
-				if (roles.Contains(role)) {
+			List<Clan> toRemove = new List<Clan>();
+			foreach (Clan c in guildData.clanList) {
+				var result = from r in roles
+							 where r.Id == c.roleID
+							 select r;
+
+				var role = result.FirstOrDefault();
+				if (role == null) {
+					toRemove.Add(c);
+					continue;
+				}
+
+				if (userRoles.Contains(role)) {
 					if (c.clanName.ToLower() != clanName.ToLower()) {
 						await userButInGuild.RemoveRoleAsync(role);
 					}
@@ -269,18 +262,47 @@ namespace ZomBot.Resources {
 					}
 				}
 			}
+
+			if (toRemove.Count() > 0) {
+				foreach (Clan c in toRemove)
+					guildData.clanList.Remove(c);
+
+				Accounts.SaveAccounts();
+			}
 		}
 
 		public static async Task LeaveClan(IUser user, SocketGuild guild) {
 			var guildData = Accounts.GetGuild(guild.Id);
 			var userButInGuild = guild.GetUser(user.Id);
-			var roles = userButInGuild.Roles;
+			var userRoles = userButInGuild.Roles;
+			var roles = guild.Roles;
 
+			List<Clan> toRemove = new List<Clan>();
 			foreach (Clan c in guildData.clanList) {
-				var role = guild.GetRole(c.roleID);
+				var result = from r in roles
+							 where r.Id == c.roleID
+							 select r;
 
-				if (roles.Contains(role))
+				var role = result.FirstOrDefault();
+				if (role == null) {
+					toRemove.Add(c);
+					continue;
+				}
+
+				if (userRoles.Contains(role))
 					await userButInGuild.RemoveRoleAsync(role);
+
+				if (role.Members.Count() == 0) {
+					await role.DeleteAsync();
+					toRemove.Add(c);
+				}
+			}
+
+			if (toRemove.Count() > 0) {
+				foreach (Clan c in toRemove)
+					guildData.clanList.Remove(c);
+
+				Accounts.SaveAccounts();
 			}
 		}
 
@@ -597,8 +619,6 @@ namespace ZomBot.Resources {
 
 			// add postgame channels
 			var category = await guild.CreateCategoryChannelAsync("Post Game");
-			await category.AddPermissionOverwriteAsync(vetmodrole, permsSee);
-			await category.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
 			await category.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
 
 			var pac = await guild.CreateTextChannelAsync("announcements");
@@ -606,21 +626,18 @@ namespace ZomBot.Resources {
 			await pac.AddPermissionOverwriteAsync(vetmodrole, permsSee);
 			await pac.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
 			await pac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-			guildAccount.channels.postgameAnnouncementsChannel = pac.Id;
 
 			var cc = await guild.CreateTextChannelAsync("criticisms");
 			await cc.ModifyAsync(x => x.CategoryId = category.Id);
 			await cc.AddPermissionOverwriteAsync(vetmodrole, permsSee);
 			await cc.AddPermissionOverwriteAsync(vetrole, permsSee);
 			await cc.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-			guildAccount.channels.criticismsChannel = cc.Id;
 
 			var ac = await guild.CreateTextChannelAsync("afterthoughts");
 			await ac.ModifyAsync(x => x.CategoryId = category.Id);
 			await ac.AddPermissionOverwriteAsync(vetmodrole, permsSee);
 			await ac.AddPermissionOverwriteAsync(vetrole, permsSee);
 			await ac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-			guildAccount.channels.afterthoughtsChannel = ac.Id;
 
 			// update player roles
 			foreach (SocketGuildUser user in guild.Users) {
@@ -635,11 +652,11 @@ namespace ZomBot.Resources {
 				if (survivors)									// confirm if players actually survived or just didn't show
 					if (userRoles.Contains(humanrole))			// convert humans into survivors
 						await user.AddRoleAsync(survivorrole);
-            }
+			}
 
 			await DeleteRoles(guild);
 
-			//guildAccount.gameData.active = false; disabled for testing
+			guildAccount.gameData.active = false;
 			Accounts.SaveAccounts();
 		}
 	}

@@ -18,6 +18,12 @@ namespace ZomBot.Commands {
                 return;
             }
 
+            var guildAccount = Accounts.GetGuild(Context.Guild);
+            if (!guildAccount.gameData.active) {
+                await RespondAsync(":x: No active game to end :x:", ephemeral: true);
+                return;
+            }
+
             if (Context.Guild is SocketGuild g) {
                 RoleHandler.EndGame(g, survivors);
 

@@ -81,7 +81,6 @@ namespace ZomBot.Data {
                 blacklisted = false,
                 warnings = new List<Warning>(),
                 specialPlayerData = new SpecialPlayerData() {
-                    oz = false,
                     revived = false
                 }
             };
