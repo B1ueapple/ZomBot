@@ -23,6 +23,7 @@ namespace ZomBot.Commands {
 				return;
 			}
 
+			guildAccount.gameLog.StartMessage();
 			guildAccount.gameData.active = true;
 			guildAccount.gameData.startTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
 			Accounts.SaveAccounts();

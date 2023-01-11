@@ -109,12 +109,12 @@ namespace ZomBot.Resources {
 				}
 			}
 
-			if (!endgame) { // revived role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.revived select r;
+			if (!endgame) { // cured role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.cured select r;
 				var role = temprole.FirstOrDefault();
 
 				if (role == null) {
-					guildAccount.roleIDs.revived = (await guild.CreateRoleAsync("Revived", color: Color.Orange, isHoisted: false, isMentionable: true)).Id;
+					guildAccount.roleIDs.cured = (await guild.CreateRoleAsync("Cured", color: Color.Orange, isHoisted: false, isMentionable: true)).Id;
 					Console.WriteLine("Created new revived role.");
 					updated = true;
 				}
@@ -194,12 +194,12 @@ namespace ZomBot.Resources {
 				}
 			}
 
-			{ // revived role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.revived select r;
+			{ // cured role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.cured select r;
 				var role = temprole.FirstOrDefault();
 
 				if (role != null) {
-					guildAccount.roleIDs.revived = 0;
+					guildAccount.roleIDs.cured = 0;
 					await guild.GetRole(role.Id).DeleteAsync();
 					Console.WriteLine("Deleted revived role.");
 				}
@@ -271,7 +271,7 @@ namespace ZomBot.Resources {
 			}
 		}
 
-		public static async Task LeaveClan(IUser user, SocketGuild guild) {
+		public static async Task LeaveClan(IUser user, SocketGuild guild, bool zombified = false) {
 			var guildData = Accounts.GetGuild(guild.Id);
 			var userButInGuild = guild.GetUser(user.Id);
 			var userRoles = userButInGuild.Roles;
@@ -295,6 +295,9 @@ namespace ZomBot.Resources {
 				if (role.Members.Count() == 0) {
 					await role.DeleteAsync();
 					toRemove.Add(c);
+
+					if (zombified)
+						guildData.gameLog.EventMessage(GameLogEvents.CLANWIPED, clan: c.clanName);
 				}
 			}
 
@@ -309,8 +312,9 @@ namespace ZomBot.Resources {
 		public static async Task JoinHumanTeam(IUser user, SocketGuild guild) {
 			await CreateRoles(guild);
 			var guildData = Accounts.GetGuild(guild.Id);
+			var userData = Accounts.GetUser(user, guild);
 			var userButInGuild = guild.GetUser(user.Id);
-			bool addHuman = true, addPlayer = true;
+			bool addHuman = true, addPlayer = true, addCured = userData.specialPlayerData.cured;
 
 			foreach (SocketRole role in userButInGuild.Roles) {
 				if (role.Id == guildData.roleIDs.mod)
@@ -323,6 +327,8 @@ namespace ZomBot.Resources {
 					addHuman = false;
 				else if (role.Id == guildData.roleIDs.player)
 					addPlayer = false;
+				else if (role.Id == guildData.roleIDs.cured)
+					addCured = false;
 			}
 
 			if (addHuman)
@@ -330,6 +336,9 @@ namespace ZomBot.Resources {
 
 			if (addPlayer)
 				await userButInGuild.AddRoleAsync(guildData.roleIDs.player);
+
+			if (addCured)
+				await userButInGuild.AddRoleAsync(guildData.roleIDs.cured);
 		}
 
 		public static async Task JoinZombieTeam(IUser user, SocketGuild guild, bool isMVZ = false) {
@@ -343,6 +352,8 @@ namespace ZomBot.Resources {
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mod);
 				else if (role.Id == guildData.roleIDs.human)
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
+				else if (role.Id == guildData.roleIDs.cured)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.cured);
 				else if (role.Id == guildData.roleIDs.zombie)
 					addZombie = false;
 				else if (role.Id == guildData.roleIDs.player)
@@ -649,13 +660,16 @@ namespace ZomBot.Resources {
 				else if (userRoles.Contains(playerrole))		// convert player role to vet role
 					await user.AddRoleAsync(vetrole);
 
-				if (survivors)									// confirm if players actually survived or just didn't show
-					if (userRoles.Contains(humanrole))			// convert humans into survivors
+				if (survivors)                                  // confirm if players actually survived or just didn't show
+					if (userRoles.Contains(humanrole)) {        // convert humans into survivors
+						guildAccount.gameLog.PlayerSurvivedMessage(user);
 						await user.AddRoleAsync(survivorrole);
+					}
 			}
 
 			await DeleteRoles(guild);
 
+			guildAccount.gameLog.EndMessage(survivors);
 			guildAccount.gameData.active = false;
 			Accounts.SaveAccounts();
 		}

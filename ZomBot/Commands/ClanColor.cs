@@ -6,9 +6,9 @@ using ZomBot.Data;
 
 namespace ZomBot.Commands {
     public class ClanColor : InteractionModuleBase {
-        [SlashCommand("clancolor", "Change the color of your clan.")]
+        [SlashCommand("clancolor", "Change the color of your clan role.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ClanColorCommand([Summary("Color", "What color to set your clan tag to.")] uint color) {
+        public async Task ClanColorCommand([Summary("Red", "Red part of your color.")][MinValue(0)][MaxValue(255)] int r, [Summary("Green", "Green part of your color.")][MinValue(0)][MaxValue(255)] int g, [Summary("Blue", "Blue part of your color.")][MinValue(0)][MaxValue(255)] int b) {
             var guild = Accounts.GetGuild(Context.Guild.Id);
             var user = Accounts.GetUser(Context.User, Context.Guild);
 
@@ -21,8 +21,8 @@ namespace ZomBot.Commands {
             if (clan.clanName == "" || clan.clanName == null)
                 await RespondAsync(":x: You're not in a clan :x:", ephemeral: true);
 
-            if (Context.Guild is SocketGuild g) {
-                await g.GetRole(clan.roleID).ModifyAsync(x => x.Color = new Discord.Color(color));
+            if (Context.Guild is SocketGuild socketGuild) {
+                await socketGuild.GetRole(clan.roleID).ModifyAsync(x => x.Color = new Discord.Color(r, g, b));
                 await RespondAsync(":thumbsup: You have updated your clan's color :thumbsup:", ephemeral: true);
             } else
                 await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);

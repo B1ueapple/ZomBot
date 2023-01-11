@@ -77,11 +77,13 @@ namespace ZomBot.Data {
         private static UserData CreateUserAccount(ulong userid, ulong guildid) {
             var newAccount = new UserData() {
                 id = userid,
+                discordUsername = "",
                 playerData = new PlayerData(),
                 blacklisted = false,
                 warnings = new List<Warning>(),
                 specialPlayerData = new SpecialPlayerData() {
-                    revived = false
+                    cured = false,
+                    isMVZ = false
                 }
             };
 
@@ -108,7 +110,11 @@ namespace ZomBot.Data {
                 gameData = new GameData() {
                     active = false,
                     startTime = 0
-                }
+                },
+                gameLog = new GameLog() {
+                    messages = new List<GameLogMessage>(),
+                    gameStage = 0
+				}
             };
 
             guildAccounts.Add(newAccount);

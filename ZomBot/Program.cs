@@ -211,11 +211,16 @@ namespace ZomBot {
 												break; // nothing changed, continue to next user
 
 										updatedPlayers++;
-										if (u.playerData.team == "zombie" && player.team == "human") // changed from zombie to human
-											u.specialPlayerData.revived = true;
+										if (u.playerData.team == "zombie" && player.team == "human") { // changed from zombie to human
+											g.gameLog.EventMessage(GameLogEvents.PLAYERCURED, u);
+											u.specialPlayerData.cured = true;
+										}
+
+										if (u.playerData.team == "human" && player.team == "zombie") { // infected human
+											g.gameLog.TagMessage(u);
+										}
 
 										u.playerData = player;
-										Accounts.SaveAccounts();
 
 										if (u.playerData.team == "human") {
 											await RoleHandler.JoinHumanTeam(user, guild);
@@ -226,10 +231,24 @@ namespace ZomBot {
 												await RoleHandler.LeaveClan(user, guild);
 										} else if (u.playerData.team == "zombie") {
 											numZombies++;
-											await RoleHandler.JoinZombieTeam(user, guild, (mvznum > 0 && u.playerData.humansTagged >= mvznum));
-											await RoleHandler.LeaveClan(user, guild); // zombies don't have affiliations with anyone but other zombies
+											if (u.specialPlayerData.cured) {
+												g.gameLog.EventMessage(GameLogEvents.WASTEDCURE, u);
+												u.specialPlayerData.cured = false;
+											}
+
+											bool isMVZ = mvznum > 0 && u.playerData.humansTagged >= mvznum;
+
+											if (isMVZ && !u.specialPlayerData.isMVZ) {
+												g.gameLog.EventMessage(GameLogEvents.NEWMVZ, u);
+												u.specialPlayerData.isMVZ = isMVZ;
+											}
+
+
+											await RoleHandler.JoinZombieTeam(user, guild, isMVZ);
+											await RoleHandler.LeaveClan(user, guild, true); // zombies don't have affiliations with anyone but other zombies
 										}
 
+										Accounts.SaveAccounts();
 										break; // played updated, next player
 									}
 								}
@@ -291,6 +310,15 @@ namespace ZomBot {
 							Accounts.SaveAccounts();
 						}
 					}
+
+					if ((playerDataList.total/4) < numZombies)
+						g.gameLog.EventMessage(GameLogEvents.QUARTERTAGGED);
+
+					if ((playerDataList.total/2) < numZombies)
+						g.gameLog.EventMessage(GameLogEvents.HALFTAGGED);
+
+					if ((playerDataList.total * (3.0f/4.0f)) < numZombies)
+						g.gameLog.EventMessage(GameLogEvents.THREEQUARTERSTAGGED);
 
 					await _client.SetGameAsync($"with {playerDataList.total - numZombies}h v {numZombies}z");
 				}
