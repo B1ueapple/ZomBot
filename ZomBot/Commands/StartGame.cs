@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ZomBot.Data;
 
@@ -18,10 +19,15 @@ namespace ZomBot.Commands {
 
 			var guildAccount = Accounts.GetGuild(Context.Guild);
 
-			if (!guildAccount.gameData.active) {
+			if (guildAccount.gameData.active) {
 				await RespondAsync(":x: Game already ongoing :x:", ephemeral: true);
 				return;
 			}
+
+			guildAccount.gameLog = new GameLog() {
+				messages = new List<GameLogMessage>(),
+				gameStage = 0
+			};
 
 			guildAccount.gameLog.StartMessage();
 			guildAccount.gameData.active = true;

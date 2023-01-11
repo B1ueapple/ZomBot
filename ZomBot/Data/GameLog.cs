@@ -17,6 +17,14 @@ namespace ZomBot.Data {
 			return msg;
 		}
 
+		private void AddMessage(GameLogMessage msg) {
+			if ((messages?.Count ?? 0) == 0)
+				messages = new List<GameLogMessage>();
+
+			messages.Add(msg);
+			Accounts.SaveAccounts();
+		}
+
 		public void TagMessage(UserData tagged) {
 			var msg = new GameLogMessage() {
 				associatedUsers = new List<GameLogUser>() {
@@ -30,8 +38,7 @@ namespace ZomBot.Data {
 				message = "%name1% has been tagged.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
-			messages.Add(msg);
-			Accounts.SaveAccounts();
+			AddMessage(msg);
 		}
 
 		public void PlayerSurvivedMessage(SocketGuildUser survivor) {
@@ -49,8 +56,7 @@ namespace ZomBot.Data {
 				message = "%name1% survived the horde.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
-			messages.Add(msg);
-			Accounts.SaveAccounts();
+			AddMessage(msg);
 		}
 
 		public void StartMessage() {
@@ -59,8 +65,7 @@ namespace ZomBot.Data {
 				message = "The game has started.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
-			messages.Add(msg);
-			Accounts.SaveAccounts();
+			AddMessage(msg);
 		}
 
 		public void EndMessage(bool survivors) {
@@ -69,8 +74,7 @@ namespace ZomBot.Data {
 				message = $"The game has ended{(survivors ? "" : " with no survivors")}.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
-			messages.Add(msg);
-			Accounts.SaveAccounts();
+			AddMessage(msg);
 		}
 
 		public void EventMessage(GameLogEvents e, UserData assocPlayer = null, string clan = null, int num1 = 0, int num2 = 0) {
@@ -136,8 +140,7 @@ namespace ZomBot.Data {
 					break;
 			}
 
-			messages.Add(msg);
-			Accounts.SaveAccounts();
+			AddMessage(msg);
 		}
 	}
 
