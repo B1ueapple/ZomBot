@@ -79,7 +79,11 @@ namespace ZomBot.Data {
                 id = userid,
                 playerData = new PlayerData(),
                 blacklisted = false,
-                warnings = new List<Warning>()
+                warnings = new List<Warning>(),
+                specialPlayerData = new SpecialPlayerData() {
+                    oz = false,
+                    revived = false
+                }
             };
 
             GetGuild(guildid).userData.Add(newAccount);
@@ -102,7 +106,10 @@ namespace ZomBot.Data {
                 },
                 setupComplete = false,
                 clanList = new List<Clan>(),
-                gameActive = true
+                gameData = new GameData() {
+                    active = false,
+                    startTime = 0
+                }
             };
 
             guildAccounts.Add(newAccount);

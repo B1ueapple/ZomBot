@@ -120,50 +120,6 @@ namespace ZomBot.Resources {
 				}
 			}
 
-			{ // survived4 role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived4 select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role == null) {
-					guildAccount.roleIDs.survived4 = (await guild.CreateRoleAsync("Survived 4 Days", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
-					Console.WriteLine("Created new survived4 role.");
-					updated = true;
-				}
-			}
-
-			{ // survived3 role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived3 select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role == null) {
-					guildAccount.roleIDs.survived3 = (await guild.CreateRoleAsync("Survived 3 Days", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
-					Console.WriteLine("Created new survived3 role.");
-					updated = true;
-				}
-			}
-
-			{ // survived2 role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived2 select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role == null) {
-					guildAccount.roleIDs.survived2 = (await guild.CreateRoleAsync("Survived 2 Days", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
-					Console.WriteLine("Created new survived2 role.");
-					updated = true;
-				}
-			}
-
-			{ // survived1 role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.survived1 select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role == null) {
-					guildAccount.roleIDs.survived1 = (await guild.CreateRoleAsync("Survived 1 Day", color: Color.LightGrey, isHoisted: false, isMentionable: true)).Id;
-					Console.WriteLine("Created new survived1 role.");
-					updated = true;
-				}
-			}
-
 			if (!endgame) { // revived role
 				var temprole = from r in roles where r.Id == guildAccount.roleIDs.revived select r;
 				var role = temprole.FirstOrDefault();
@@ -519,7 +475,6 @@ namespace ZomBot.Resources {
 
 		public static async void EndGame(SocketGuild guild, bool survivors) {
 			await CreateRoles(guild, true);
-			await DeleteRoles(guild);
 			var guildAccount = Accounts.GetGuild(guild);
 			List<ulong> remove = new List<ulong>();
 
@@ -531,11 +486,23 @@ namespace ZomBot.Resources {
 			var roles = guild.Roles;
 			IEnumerable<SocketRole> temprole;
 
+			temprole = from r in roles where r.Id == guildAccount.roleIDs.survivor select r;
+			var survivorrole = temprole.FirstOrDefault();
+
+			temprole = from r in roles where r.Id == guildAccount.roleIDs.human select r;
+			var humanrole = temprole.FirstOrDefault();
+
 			temprole = from r in roles where r.Id == guildAccount.roleIDs.veteranmod select r;
 			var vetmodrole = temprole.FirstOrDefault();
 
+			temprole = from r in roles where r.Id == guildAccount.roleIDs.mod select r;
+			var modrole = temprole.FirstOrDefault();
+
 			temprole = from r in roles where r.Id == guildAccount.roleIDs.veteran select r;
 			var vetrole = temprole.FirstOrDefault();
+
+			temprole = from r in roles where r.Id == guildAccount.roleIDs.player select r;
+			var playerrole = temprole.FirstOrDefault();
 
 			// update all game channels for post game roles
 			{
@@ -630,8 +597,11 @@ namespace ZomBot.Resources {
 
 			// add postgame channels
 			var category = await guild.CreateCategoryChannelAsync("Post Game");
+			await category.AddPermissionOverwriteAsync(vetmodrole, permsSee);
+			await category.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
+			await category.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
 
-			var pac = await guild.CreateTextChannelAsync("postgame-announcements");
+			var pac = await guild.CreateTextChannelAsync("announcements");
 			await pac.ModifyAsync(x => x.CategoryId = category.Id);
 			await pac.AddPermissionOverwriteAsync(vetmodrole, permsSee);
 			await pac.AddPermissionOverwriteAsync(vetrole, permsSeeNoSpeak);
@@ -652,6 +622,24 @@ namespace ZomBot.Resources {
 			await ac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
 			guildAccount.channels.afterthoughtsChannel = ac.Id;
 
+			// update player roles
+			foreach (SocketGuildUser user in guild.Users) {
+				var userRoles = user.Roles;
+
+				// users should not have both of these
+				if (userRoles.Contains(modrole))				// convert mod role to vetmod role
+					await user.AddRoleAsync(vetmodrole);
+				else if (userRoles.Contains(playerrole))		// convert player role to vet role
+					await user.AddRoleAsync(vetrole);
+
+				if (survivors)									// confirm if players actually survived or just didn't show
+					if (userRoles.Contains(humanrole))			// convert humans into survivors
+						await user.AddRoleAsync(survivorrole);
+            }
+
+			await DeleteRoles(guild);
+
+			//guildAccount.gameData.active = false; disabled for testing
 			Accounts.SaveAccounts();
 		}
 	}

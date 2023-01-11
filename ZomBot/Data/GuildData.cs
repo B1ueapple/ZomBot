@@ -9,8 +9,13 @@ namespace ZomBot.Data {
 		public MissionList missions;
 		public bool setupComplete;
 		public List<Clan> clanList;
-		public bool gameActive;
+		public GameData gameData;
 	}
+
+	public struct GameData {
+		public bool active;
+		public long startTime;
+    }
 
 	public struct RoleList {
 		// transient roles
@@ -19,16 +24,11 @@ namespace ZomBot.Data {
 		public ulong mod;			// given to all mods
 		public ulong mvz;			// given to zombie(s) with the most tags
 		public ulong player;        // given to all players (convenience mention for mods)
-		public ulong oz;            // given to ozs
 		public ulong revived;       // given to anyone that is turned from zombie -> human
 
 		// roles that persist
 		public ulong veteran;		// awarded to all players after game concludes
 		public ulong veteranmod;	// awarded to all mods after game concludes
-		public ulong survived1;     // awarded if human at beginning of second day
-		public ulong survived2;     // awarded if human at beginning of third day
-		public ulong survived3;     // awarded if human at beginning of fourth day
-		public ulong survived4;		// awarded if human at beginning of fifth day
 		public ulong survivor;		// awarded if human after end of final night mission
 
 	}

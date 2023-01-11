@@ -7,6 +7,7 @@ namespace ZomBot.Data {
         public PlayerData playerData;
         public bool blacklisted;
         public List<Warning> warnings;
+        public SpecialPlayerData specialPlayerData;
 
         public void AddWarning(IUser issuer, string reason) {
             if (blacklisted)
@@ -25,6 +26,11 @@ namespace ZomBot.Data {
             warnings.Add(warning);
             Accounts.SaveAccounts();
         }
+    }
+
+    public struct SpecialPlayerData {
+        public bool oz;
+        public bool revived;
     }
     
     public class PlayerData { // cannot be changed - based on website api
