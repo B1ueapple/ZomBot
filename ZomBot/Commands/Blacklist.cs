@@ -14,7 +14,7 @@ namespace ZomBot.Commands {
             account.blacklisted = set;
             Accounts.SaveAccounts();
 
-            await RespondAsync(set ? $"Added {user.Username} to blacklist." : $"Removed {user.Username} from blacklist.", ephemeral: true);
+            await RespondAsync(set ? $":thumbsup: Added {user.Username} to blacklist." : $":thumbsup: Removed {user.Username} from blacklist. :thumbsup:", ephemeral: true);
         }
 
         [UserCommand("Blacklist")]
@@ -24,8 +24,8 @@ namespace ZomBot.Commands {
             var account = Accounts.GetUser(user, Context.Guild);
             account.blacklisted = !account.blacklisted;
             Accounts.SaveAccounts();
-
-            await RespondAsync(account.blacklisted ? $"Added {user.Username} to blacklist." : $"Removed {user.Username} from blacklist.", ephemeral: true);
+            
+            await RespondAsync(account.blacklisted ? $":thumbsup: Added {user.Username} to blacklist." : $":thumbsup: Removed {user.Username} from blacklist. :thumbsup:", ephemeral: true);
         }
     }
 }
