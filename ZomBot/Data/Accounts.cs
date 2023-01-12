@@ -29,15 +29,15 @@ namespace ZomBot.Data {
         }
 
         public static UserData GetUser(SocketGuildUser user) {
-            return GetOrCreateUserAccount(user.Id, user.Guild.Id);
+            return GetOrCreateUserAccount(user.Id, user.Guild.Id, user.Username);
         }
 
         public static UserData GetUser(IUser user, IGuild guild) {
-            return GetOrCreateUserAccount(user.Id, guild.Id);
+            return GetOrCreateUserAccount(user.Id, guild.Id, user.Username);
         }
 
         public static UserData GetUser(ulong userid, ulong guildid) {
-            return GetOrCreateUserAccount(userid, guildid);
+            return GetOrCreateUserAccount(userid, guildid, "");
         }
 
         public static GuildData GetGuild(IGuild guild) {
@@ -48,7 +48,7 @@ namespace ZomBot.Data {
             return GetOrCreateGuildAccount(id);
         }
 
-        private static UserData GetOrCreateUserAccount(ulong userid, ulong guildid) {
+        private static UserData GetOrCreateUserAccount(ulong userid, ulong guildid, string username) {
             var result = from a in GetGuild(guildid).userData
                          where a.id == userid
                          select a;
@@ -56,7 +56,7 @@ namespace ZomBot.Data {
             var account = result.FirstOrDefault();
 
             if (account == null)
-                account = CreateUserAccount(userid, guildid);
+                account = CreateUserAccount(userid, guildid, username);
 
             return account;
         }
@@ -74,16 +74,17 @@ namespace ZomBot.Data {
             return account;
         }
 
-        private static UserData CreateUserAccount(ulong userid, ulong guildid) {
+        private static UserData CreateUserAccount(ulong userid, ulong guildid, string username) {
             var newAccount = new UserData() {
                 id = userid,
-                discordUsername = "",
+                discordUsername = username,
                 playerData = new PlayerData(),
                 blacklisted = false,
                 warnings = new List<Warning>(),
                 specialPlayerData = new SpecialPlayerData() {
                     cured = false,
-                    isMVZ = false
+                    isMVZ = false,
+                    tagsToday = 0
                 }
             };
 

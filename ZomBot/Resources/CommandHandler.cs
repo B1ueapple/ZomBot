@@ -25,6 +25,10 @@ namespace ZomBot.Resources {
 
             var context = new SocketCommandContext(_client, msg);
 
+            var acc = Accounts.GetUser(context.User, context.Guild);
+            if ((acc.discordUsername ?? "") == "")
+                acc.discordUsername = context.User.Username;
+
             if (context.Guild != null) {
                 int argPos = 0;
 

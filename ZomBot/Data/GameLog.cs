@@ -6,14 +6,16 @@ namespace ZomBot.Data {
 	public class GameLog {
 		public List<GameLogMessage> messages;
 		public int gameStage;
+		public long startTime;
+		public long endTime;
 
 		public string GetFormattedMessages(GameLogMessageFormat format) {
-			string msg = "";
+			string msg = $"HvZ : {DateTimeOffset.FromUnixTimeMilliseconds(startTime).ToLocalTime().Month}/{DateTimeOffset.FromUnixTimeMilliseconds(startTime).ToLocalTime().Day}/{DateTimeOffset.FromUnixTimeMilliseconds(startTime).ToLocalTime().Year} to {DateTimeOffset.FromUnixTimeMilliseconds(endTime).ToLocalTime().Month}/{DateTimeOffset.FromUnixTimeMilliseconds(endTime).ToLocalTime().Day}/{DateTimeOffset.FromUnixTimeMilliseconds(endTime).ToLocalTime().Year} \n--------------------------------------------------\n";
 
-			foreach (GameLogMessage glm in messages) {
+			foreach (GameLogMessage glm in messages)
 				msg += $"{glm.FormattedMessage(format)}\n";
-			}
 
+			msg += "--------------------------------------------------";
 			return msg;
 		}
 
@@ -35,21 +37,36 @@ namespace ZomBot.Data {
 						index = 1
 					}
 				},
-				message = "%name1% has been tagged.",
+				message = "%name1% has been infected.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
 			AddMessage(msg);
 		}
 
-		public void PlayerSurvivedMessage(SocketGuildUser survivor) {
-			var data = Accounts.GetUser(survivor);
+		public void ZombieRecapMessage(UserData zombie) {
+			var msg = new GameLogMessage() {
+				associatedUsers = new List<GameLogUser>() {
+					new GameLogUser() {
+						discordID = zombie.id,
+						discordUsername = zombie.discordUsername,
+						websiteName = zombie.playerData.name,
+						index = 1
+					}
+				},
+				message = $"%name1% infected {zombie.specialPlayerData.tagsToday} humans today.",
+				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+			};
+			AddMessage(msg);
+		}
+
+		public void PlayerSurvivedMessage(UserData survivor) {
 
 			var msg = new GameLogMessage() {
 				associatedUsers = new List<GameLogUser>() {
 					new GameLogUser() {
-						discordID = data.id,
-						discordUsername = data.discordUsername,
-						websiteName = data.playerData.name,
+						discordID = survivor.id,
+						discordUsername = survivor.discordUsername,
+						websiteName = survivor.playerData.name,
 						index = 1
 					}
 				},
@@ -68,15 +85,16 @@ namespace ZomBot.Data {
 			AddMessage(msg);
 		}
 
-		public void EndMessage(bool survivors) {
+		public void EndMessage(bool survivors, int numsurvivors) {
 			var msg = new GameLogMessage() {
 				associatedUsers = new List<GameLogUser>(),
-				message = $"The game has ended{(survivors ? "" : " with no survivors")}.",
+				message = $"The game has ended{(survivors ? $" with {numsurvivors} survivors" : " with no survivors")}.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
 			AddMessage(msg);
 		}
 
+		// must call quartertagged -> halftagged -> threequarterstagged in order to log
 		public void EventMessage(GameLogEvents e, UserData assocPlayer = null, string clan = null, int num1 = 0, int num2 = 0) {
 			var msg = new GameLogMessage() {
 				associatedUsers = new List<GameLogUser>(),
@@ -89,24 +107,24 @@ namespace ZomBot.Data {
 						return;
 
 					gameStage = 1;
-					msg.message = "1/4 of the humans have been infected!";
+					msg.message = "A quarter of all humans have been infected!";
 					break;
 				case GameLogEvents.HALFTAGGED:
 					if (gameStage != 1)
 						return;
 
 					gameStage = 2;
-					msg.message = "1/2 of the humans have been infected!";
+					msg.message = "Half of all humans have been infected!";
 					break;
 				case GameLogEvents.THREEQUARTERSTAGGED:
 					if (gameStage != 2)
 						return;
 
 					gameStage = 3;
-					msg.message = "3/4 of the humans have been infected!";
+					msg.message = "The vast majority of the humans have been infected!";
 					break;
 				case GameLogEvents.PLAYERCURED:
-					msg.message = "%name1% has been cured!";
+					msg.message = "%name1% has been cured.";
 					msg.associatedUsers.Add(new GameLogUser() {
 						discordID = assocPlayer.id,
 						discordUsername = assocPlayer.discordUsername,
@@ -115,7 +133,7 @@ namespace ZomBot.Data {
 					});
 					break;
 				case GameLogEvents.WASTEDCURE:
-					msg.message = "%name1% has wasted their cure!";
+					msg.message = "%name1% has wasted their cure.";
 					msg.associatedUsers.Add(new GameLogUser() {
 						discordID = assocPlayer.id,
 						discordUsername = assocPlayer.discordUsername,
@@ -124,7 +142,7 @@ namespace ZomBot.Data {
 					});
 					break;
 				case GameLogEvents.NEWMVZ:
-					msg.message = $"%name1% has set a new record for tags: {num1}";
+					msg.message = $"%name1% has achieved a new high of {num1} infections!";
 					msg.associatedUsers.Add(new GameLogUser() {
 						discordID = assocPlayer.id,
 						discordUsername = assocPlayer.discordUsername,
@@ -133,10 +151,10 @@ namespace ZomBot.Data {
 					});
 					break;
 				case GameLogEvents.ENDOFDAY:
-					msg.message = $"---------------\nDay ended with {num1} tags and {num2} humans left.\n---------------";
+					msg.message = $"~~ Day ended with {num1} infections and {num2} humans remaining. ~~";
 					break;
 				case GameLogEvents.CLANWIPED:
-					msg.message = $"{clan} has been wiped out!";
+					msg.message = $"All of '{clan}' has been wiped out!";
 					break;
 			}
 
@@ -150,21 +168,23 @@ namespace ZomBot.Data {
 		public long time;
 
 		public string FormattedMessage(GameLogMessageFormat format) {
-			string msg = $"[{DateTimeOffset.FromUnixTimeMilliseconds(time).Month}/{DateTimeOffset.FromUnixTimeMilliseconds(time).Day} @ {DateTimeOffset.FromUnixTimeMilliseconds(time).Hour}:{DateTimeOffset.FromUnixTimeMilliseconds(time).Minute}:{DateTimeOffset.FromUnixTimeMilliseconds(time).Second}] {message}";
+			string msg = $"[{DateTimeOffset.FromUnixTimeMilliseconds(time).ToLocalTime().DayOfWeek} @ {DateTimeOffset.FromUnixTimeMilliseconds(time).ToLocalTime().Hour}:{DateTimeOffset.FromUnixTimeMilliseconds(time).ToLocalTime().Minute}] {message}";
 
 			if (associatedUsers.Count > 0) {
 				foreach (GameLogUser user in associatedUsers) {
-					string name = "";
+					string name = "%error%";
 
 					switch (format) {
 						case GameLogMessageFormat.DISCORDNAME:
-							name = user.discordUsername;
+							if ((user.discordUsername ?? "") != "")
+								name = user.discordUsername;
 							break;
 						case GameLogMessageFormat.DISCORDMENTION:
 							name = $"<@{user.discordID}>";
 							break;
 						case GameLogMessageFormat.WEBSITE:
-							name = user.websiteName;
+							if ((user.websiteName ?? "") != "")
+								name = user.websiteName;
 							break;
 					}
 

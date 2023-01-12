@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ZomBot.Data;
@@ -26,7 +27,8 @@ namespace ZomBot.Commands {
 
 			guildAccount.gameLog = new GameLog() {
 				messages = new List<GameLogMessage>(),
-				gameStage = 0
+				gameStage = 0,
+				startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
 
 			guildAccount.gameLog.StartMessage();

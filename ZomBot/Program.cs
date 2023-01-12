@@ -194,9 +194,8 @@ namespace ZomBot {
 						if (pl.team != "zombie")
 							continue;
 
-						if (pl.humansTagged > mvznum) {
+						if (pl.humansTagged > mvznum)
 							mvznum = pl.humansTagged;
-						}
 					}
 
 					await guild.DownloadUsersAsync();
@@ -216,6 +215,9 @@ namespace ZomBot {
 									if (u.playerData.id == player.id) {
 										if (u.playerData.team == "human" && u.playerData.clan == player.clan)
 												break; // nothing changed, continue to next user
+
+										if (player.humansTagged > u.playerData.humansTagged)
+											u.specialPlayerData.tagsToday += player.humansTagged - u.playerData.humansTagged;
 
 										updatedPlayers++;
 										if (u.playerData.team == "zombie" && player.team == "human") { // changed from zombie to human
@@ -251,6 +253,8 @@ namespace ZomBot {
 												u.specialPlayerData.isMVZ = isMVZ;
 											}
 
+											if (newDay && u.specialPlayerData.tagsToday > 0)
+												g.gameLog.ZombieRecapMessage(u);
 
 											await RoleHandler.JoinZombieTeam(user, guild, isMVZ);
 											await RoleHandler.LeaveClan(user, guild, true); // zombies don't have affiliations with anyone but other zombies

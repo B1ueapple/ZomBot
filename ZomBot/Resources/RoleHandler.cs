@@ -506,7 +506,7 @@ namespace ZomBot.Resources {
 			}
 		}
 
-		public static async void EndGame(SocketGuild guild, bool survivors) {
+		public static async Task EndGame(SocketGuild guild, bool survivors) {
 			await CreateRoles(guild, true);
 			var guildAccount = Accounts.GetGuild(guild);
 			List<ulong> remove = new List<ulong>();
@@ -627,7 +627,7 @@ namespace ZomBot.Resources {
 			guildAccount.channels.modChannels = new List<ulong>();
 			guildAccount.channels.humanChannels = new List<ulong>();
 			guildAccount.channels.zombieChannels = new List<ulong>();
-
+			
 			// add postgame channels
 			var category = await guild.CreateCategoryChannelAsync("Post Game");
 			await category.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
@@ -649,8 +649,9 @@ namespace ZomBot.Resources {
 			await ac.AddPermissionOverwriteAsync(vetmodrole, permsSee);
 			await ac.AddPermissionOverwriteAsync(vetrole, permsSee);
 			await ac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-
+			
 			// update player roles
+			int numsurvivors = 0;
 			foreach (SocketGuildUser user in guild.Users) {
 				var userRoles = user.Roles;
 
@@ -662,14 +663,16 @@ namespace ZomBot.Resources {
 
 				if (survivors)                                  // confirm if players actually survived or just didn't show
 					if (userRoles.Contains(humanrole)) {        // convert humans into survivors
-						guildAccount.gameLog.PlayerSurvivedMessage(user);
+						guildAccount.gameLog.PlayerSurvivedMessage(Accounts.GetUser(user));
 						await user.AddRoleAsync(survivorrole);
+						numsurvivors++;
 					}
 			}
 
 			await DeleteRoles(guild);
 
-			guildAccount.gameLog.EndMessage(survivors);
+			guildAccount.gameLog.EndMessage(survivors, numsurvivors);
+			guildAccount.gameLog.endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 			guildAccount.gameData.active = false;
 			Accounts.SaveAccounts();
 		}
