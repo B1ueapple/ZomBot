@@ -109,7 +109,8 @@ namespace ZomBot.Data {
                 clanList = new List<Clan>(),
                 gameData = new GameData() {
                     active = false,
-                    startTime = 0
+                    startTime = 0,
+                    daysElapsed = 0
                 },
                 gameLog = new GameLog() {
                     messages = new List<GameLogMessage>(),

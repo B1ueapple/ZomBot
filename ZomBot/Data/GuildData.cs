@@ -16,6 +16,8 @@ namespace ZomBot.Data {
 	public struct GameData {
 		public bool active;
 		public long startTime;
+		public int daysElapsed;
+		public int tagsToday;
 	}
 
 	public struct RoleList {

@@ -181,6 +181,13 @@ namespace ZomBot {
 					if (!g.gameData.active)
 						continue;
 
+					bool newDay = DateTimeOffset.FromUnixTimeSeconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+					if (newDay) {
+						g.gameData.tagsToday = 0;
+						g.gameData.daysElapsed++;
+					}
+
 					int mvznum = 0;
 					int numZombies = 0;
 					foreach (PlayerData pl in playerDataList.players) { // update needed count for mvz
@@ -217,6 +224,7 @@ namespace ZomBot {
 										}
 
 										if (u.playerData.team == "human" && player.team == "zombie") { // infected human
+											g.gameData.tagsToday++;
 											g.gameLog.TagMessage(u);
 										}
 
@@ -321,6 +329,9 @@ namespace ZomBot {
 						g.gameLog.EventMessage(GameLogEvents.THREEQUARTERSTAGGED);
 
 					await _client.SetGameAsync($"with {playerDataList.total - numZombies}h v {numZombies}z");
+
+					if (newDay)
+						g.gameLog.EventMessage(GameLogEvents.ENDOFDAY, num1: g.gameData.tagsToday, num2: playerDataList.total - numZombies);
 				}
 			}
 

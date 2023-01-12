@@ -189,7 +189,7 @@ namespace ZomBot.Data {
 		PLAYERCURED,
 		WASTEDCURE,
 		NEWMVZ,
-		ENDOFDAY, // unimplemented
+		ENDOFDAY,
 		CLANWIPED
 	}
 

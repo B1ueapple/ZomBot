@@ -30,8 +30,11 @@ namespace ZomBot.Commands {
 			};
 
 			guildAccount.gameLog.StartMessage();
-			guildAccount.gameData.active = true;
-			guildAccount.gameData.startTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
+			guildAccount.gameData = new GameData() {
+				active = true,
+				startTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+				daysElapsed = 0
+			};
 			Accounts.SaveAccounts();
 
 			await RespondAsync(":thumbsup: The game has been marked as started :thumbsup:", ephemeral: true);
