@@ -76,6 +76,17 @@ namespace ZomBot.Resources {
 				}
 			}
 
+			if (!endgame) { // cured role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.cured select r;
+				var role = temprole.FirstOrDefault();
+
+				if (role == null) {
+					guildAccount.roleIDs.cured = (await guild.CreateRoleAsync("Cured", color: Color.Orange, isHoisted: false, isMentionable: true)).Id;
+					Console.WriteLine("Created new revived role.");
+					updated = true;
+				}
+			}
+
 			if (!endgame) { // human role
 				var temprole = from r in roles where r.Id == guildAccount.roleIDs.human select r;
 				var role = temprole.FirstOrDefault();
@@ -105,17 +116,6 @@ namespace ZomBot.Resources {
 				if (role == null) {
 					guildAccount.roleIDs.survivor = (await guild.CreateRoleAsync("Survivor", color: Color.Magenta, isHoisted: true, isMentionable: true)).Id;
 					Console.WriteLine("Created new survivor role.");
-					updated = true;
-				}
-			}
-
-			if (!endgame) { // cured role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.cured select r;
-				var role = temprole.FirstOrDefault();
-
-				if (role == null) {
-					guildAccount.roleIDs.cured = (await guild.CreateRoleAsync("Cured", color: Color.Orange, isHoisted: false, isMentionable: true)).Id;
-					Console.WriteLine("Created new revived role.");
 					updated = true;
 				}
 			}

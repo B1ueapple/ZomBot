@@ -19,8 +19,6 @@ namespace ZomBot {
 		private static ModDataList modDataList;
 		private static MissionList missionList;
 
-		private static bool WebsiteStatus = false;
-
 		static void Main(string[] args) => new Program().StartAsync().GetAwaiter().GetResult();
 
 		public async Task StartAsync() {

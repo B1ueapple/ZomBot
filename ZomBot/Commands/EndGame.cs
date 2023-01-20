@@ -26,7 +26,7 @@ namespace ZomBot.Commands {
             }
 
             if (Context.Guild is SocketGuild g) {
-                await RespondAsync(":thumbsup: The server is being updated to reflect the game ending :thumbsup:", ephemeral: true);
+                await RespondAsync(":thumbsup: The server is being updated to reflect the game ending :thumbsup:", ephemeral: true); // respond before execution because execution takes too long...
                 await RoleHandler.EndGame(g, survivors);
 
                 if (!Directory.Exists("Data"))
