@@ -34,7 +34,6 @@ namespace ZomBot.Resources {
 			});
 
 			Console.WriteLine($"Created new role for clan: {clanName}");
-
 			Accounts.SaveAccounts();
 		}
 
@@ -323,6 +322,12 @@ namespace ZomBot.Resources {
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.mvz);
 				else if (role.Id == guildData.roleIDs.zombie)
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
+				else if (role.Id == guildData.roleIDs.veteran)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.veteran);
+				else if (role.Id == guildData.roleIDs.veteranmod)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.veteranmod);
+				else if (role.Id == guildData.roleIDs.survivor)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.survivor);
 				else if (role.Id == guildData.roleIDs.human)
 					addHuman = false;
 				else if (role.Id == guildData.roleIDs.player)
@@ -354,6 +359,12 @@ namespace ZomBot.Resources {
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
 				else if (role.Id == guildData.roleIDs.cured)
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.cured);
+				else if (role.Id == guildData.roleIDs.veteran)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.veteran);
+				else if (role.Id == guildData.roleIDs.veteranmod)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.veteranmod);
+				else if (role.Id == guildData.roleIDs.survivor)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.survivor);
 				else if (role.Id == guildData.roleIDs.zombie)
 					addZombie = false;
 				else if (role.Id == guildData.roleIDs.player)
@@ -391,8 +402,16 @@ namespace ZomBot.Resources {
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.zombie);
 				else if (role.Id == guildData.roleIDs.human)
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.human);
+				else if (role.Id == guildData.roleIDs.cured)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.cured);
 				else if (role.Id == guildData.roleIDs.player)
 					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.player);
+				else if (role.Id == guildData.roleIDs.veteran)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.veteran);
+				else if (role.Id == guildData.roleIDs.veteranmod)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.veteranmod);
+				else if (role.Id == guildData.roleIDs.survivor)
+					await userButInGuild.RemoveRoleAsync(guildData.roleIDs.survivor);
 			}
 
 			if (addMod)
