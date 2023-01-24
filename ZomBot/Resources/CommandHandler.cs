@@ -8,40 +8,48 @@ using System.Threading.Tasks;
 using ZomBot.Data;
 
 namespace ZomBot.Resources {
-    public class CommandHandler {
-        DiscordSocketClient _client;
-        CommandService _service;
+	public class CommandHandler {
+		DiscordSocketClient _client;
+		CommandService _service;
 
-        public async Task InitializeAsync(DiscordSocketClient client) {
-            _client = client;
-            _service = new CommandService();
+		public async Task InitializeAsync(DiscordSocketClient client) {
+			_client = client;
+			_service = new CommandService();
 
-            await _service.AddModulesAsync(Assembly.GetEntryAssembly(), null);
-            _client.MessageReceived += HandleCommandAsync;
-        }
+			await _service.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+			_client.MessageReceived += HandleCommandAsync;
+		}
 
-        private async Task HandleCommandAsync(SocketMessage s) {
-            if (!(s is SocketUserMessage msg) || s.Author.IsBot) return;
+		private async Task HandleCommandAsync(SocketMessage s) {
+			if (!(s is SocketUserMessage msg) || s.Author.IsBot) return;
 
-            var context = new SocketCommandContext(_client, msg);
+			var context = new SocketCommandContext(_client, msg);
 
-            var acc = Accounts.GetUser(context.User, context.Guild);
-            if ((acc.discordUsername ?? "") == "")
-                acc.discordUsername = context.User.Username;
+			var acc = Accounts.GetUser(context.User, context.Guild);
+			if ((acc.discordUsername ?? "") == "")
+				acc.discordUsername = context.User.Username;
 
-            if (context.Guild != null) {
-                int argPos = 0;
+			if (context.Guild != null) {
+				var words = msg.Content.ToLower().Split(' ');
+				foreach (string word in words) {
+					if (word == "gun") {
+						await context.Message.ReplyAsync("UwU You thought you could escape? Gotta say Blasters here too, buckaroo.");
+						return;
+					}
+				}
 
-                if (msg.HasStringPrefix(Config.bot.prefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
-                    var result = await _service.ExecuteAsync(context, argPos, null);
+				int argPos = 0;
 
-                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand) {
-                        Console.WriteLine(result.ErrorReason);
-                        await context.Channel.SendMessageAsync($":x: {result.ErrorReason} :x:");
-                    }
-                }
-            } else
-                await context.Channel.SendMessageAsync("I'm afraid of isolated spaces. (My owner is too lazy to fix crashes caused by using commands in DMs)");
-        }
-    }
+				if (msg.HasStringPrefix(Config.bot.prefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
+					var result = await _service.ExecuteAsync(context, argPos, null);
+
+					if (!result.IsSuccess && result.Error != CommandError.UnknownCommand) {
+						Console.WriteLine(result.ErrorReason);
+						await context.Channel.SendMessageAsync($":x: {result.ErrorReason} :x:");
+					}
+				}
+			} else
+				await context.Channel.SendMessageAsync("I'm afraid of isolated spaces. (My owner is too lazy to fix crashes caused by using commands in DMs)");
+		}
+	}
 }
