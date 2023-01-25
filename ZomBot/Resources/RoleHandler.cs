@@ -20,13 +20,13 @@ namespace ZomBot.Resources {
 				if (c.clanName.ToLower().Contains(clanName.ToLower()))
 					return;
 
-			SocketRole humanRole = guild.GetRole(guildAccount.roleIDs.human);
+			SocketRole curedRole = guild.GetRole(guildAccount.roleIDs.cured);
 
 			var rand = new Random();
 			uint color = (uint)rand.Next(0, 0xffffff);
 
 			ulong r = (await guild.CreateRoleAsync(clanName, color: color, isHoisted: false, isMentionable: true)).Id;
-			await guild.GetRole(r).ModifyAsync(x => x.Position = humanRole.Position + 1);
+			await guild.GetRole(r).ModifyAsync(x => x.Position = curedRole.Position + 1);
 
 			guildAccount.clanList.Add(new Clan() {
 				clanName = clanName,
