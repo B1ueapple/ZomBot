@@ -112,6 +112,7 @@
     <Compile Include="Commands\Channels.cs" />
     <Compile Include="Commands\EndGame.cs" />
     <Compile Include="Commands\Link.cs" />
+    <Compile Include="Commands\Refresh.cs" />
     <Compile Include="Commands\StartGame.cs" />
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Warn.cs" />

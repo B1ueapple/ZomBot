@@ -143,7 +143,7 @@ namespace ZomBot {
 			return modDataList;
 		}
 
-		public void GetSiteData() {
+		public static void GetSiteData() {
 			string rawPlayerData = "";
 			string rawModData = "";
 			string rawMissionData = "";
@@ -210,8 +210,8 @@ namespace ZomBot {
 
 							if (u.playerData.name != null && u.playerData.name != "") { // iterate through non-mod players
 								foreach (PlayerData player in playerDataList.players) {
-									if (u.playerData.id == player.id) {
-										if (u.playerData.team == "human" && u.playerData.clan == player.clan)
+									if (u.playerData.id == player.id) { // found player
+										if (u.playerData.team == player.team && player.team == "human" && u.playerData.clan == player.clan)
 												break; // nothing changed, continue to next user
 
 										if (player.humansTagged > u.playerData.humansTagged)
@@ -347,7 +347,7 @@ namespace ZomBot {
 			return Task.CompletedTask;
 		}
 
-		private void Log(string msg) {
+		private static void Log(string msg) {
 			Console.WriteLine($"[{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}] {msg}");
 		}
 	}
