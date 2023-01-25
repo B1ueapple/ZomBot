@@ -33,9 +33,12 @@ namespace ZomBot.Commands {
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted) {
-                            if (player.team == "human")
+                            if (player.team == "human") {
                                 await RoleHandler.JoinHumanTeam(Context.User, guild);
-                            else if (player.team == "zombie")
+
+                                if (ud.playerData.clan != null && ud.playerData.clan != "")
+                                    await RoleHandler.JoinClan(Context.User, guild, ud.playerData.clan);
+                            } else if (player.team == "zombie")
                                 await RoleHandler.JoinZombieTeam(Context.User, guild);
                         }
 
