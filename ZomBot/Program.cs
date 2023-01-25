@@ -61,8 +61,10 @@ namespace ZomBot {
 			};
 
 			if (Config.bot.apionline && Config.bot.apikey != "") {
+				Log("API ONLINE");
 				fiveMinutes.Elapsed += UpdatePlayers;
-			}
+			} else
+				Log("API OFFLINE");
 
 			try {
 				GetSiteData();
@@ -176,8 +178,6 @@ namespace ZomBot {
 			if (_client.Guilds.Count > 0) {
 				foreach (SocketGuild guild in _client.Guilds) {
 					var g = Accounts.GetGuild(guild);
-					if (!g.gameData.active)
-						continue;
 
 					bool newDay = DateTimeOffset.FromUnixTimeSeconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
@@ -233,7 +233,7 @@ namespace ZomBot {
 										if (u.playerData.team == "human") {
 											await RoleHandler.JoinHumanTeam(user, guild);
 
-											if (u.playerData.clan != null && u.playerData.clan != "")
+											if ((u.playerData?.clan ?? "") != "")
 												await RoleHandler.JoinClan(user, guild, u.playerData.clan);
 											else
 												await RoleHandler.LeaveClan(user, guild);
@@ -347,7 +347,7 @@ namespace ZomBot {
 			return Task.CompletedTask;
 		}
 
-		private static void Log(string msg) {
+		public static void Log(string msg) {
 			Console.WriteLine($"[{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}] {msg}");
 		}
 	}

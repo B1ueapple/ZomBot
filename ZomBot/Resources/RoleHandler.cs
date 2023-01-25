@@ -233,7 +233,7 @@ namespace ZomBot.Resources {
 		}
 
 		public static async Task JoinClan(IUser user, SocketGuild guild, string clanName) {
-			await CreateClanRole(guild, clanName);
+			await CreateClanRole(guild, clanName.Trim());
 			var guildData = Accounts.GetGuild(guild.Id);
 			var userButInGuild = guild.GetUser(user.Id);
 			var userRoles = userButInGuild.Roles;
@@ -252,11 +252,11 @@ namespace ZomBot.Resources {
 				}
 
 				if (userRoles.Contains(role)) {
-					if (c.clanName.ToLower() != clanName.ToLower()) {
+					if (c.clanName.Trim().ToLower() != clanName.Trim().ToLower()) {
 						await userButInGuild.RemoveRoleAsync(role);
 					}
 				} else {
-					if (c.clanName.ToLower() == clanName.ToLower()) {
+					if (c.clanName.Trim().ToLower() == clanName.Trim().ToLower()) {
 						await userButInGuild.AddRoleAsync(role);
 					}
 				}

@@ -42,7 +42,7 @@ namespace ZomBot.Commands {
                                 await RoleHandler.JoinZombieTeam(Context.User, guild);
                         }
 
-                        Console.WriteLine($"{player.name} has linked their discord.");
+                        Program.Log($"{player.name} has linked their discord.");
                         await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
                         return;
                     }
@@ -60,7 +60,7 @@ namespace ZomBot.Commands {
                         if (!ud.blacklisted)
                             await RoleHandler.JoinModTeam(Context.User, guild);
 
-                        Console.WriteLine($"{player.name} has linked their discord.");
+                        Program.Log($"{player.name} has linked their discord.");
                         await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
                         return;
                     }
@@ -87,6 +87,7 @@ namespace ZomBot.Commands {
                 var ud = Accounts.GetUser(user ?? Context.User, guild);
 
                 if (ud.playerData.name != null && ud.playerData.name != "") {
+                    Program.Log($"{ud.playerData.name} has unlinked their account.");
                     PlayerData p = new PlayerData {
                         name = ""
                     };
@@ -133,7 +134,7 @@ namespace ZomBot.Commands {
                                 await RoleHandler.JoinZombieTeam(user, guild);
                         }
 
-                        Console.WriteLine($"{player.name} has been linked.");
+                        Program.Log($"{player.name} has been linked by {Context.User.Username}.");
                         await RespondAsync($":thumbsup: You have successfully linked their account to {player.name} :thumbsup:", ephemeral: true);
                         return;
                     }
@@ -151,7 +152,7 @@ namespace ZomBot.Commands {
                         if (!ud.blacklisted)
                             await RoleHandler.JoinModTeam(user, guild);
 
-                        Console.WriteLine($"{player.name} has been linked.");
+                        Program.Log($"{player.name} has been linked by {Context.User.Username}.");
                         await RespondAsync($":thumbsup: You have successfully linked their account to {player.name} :thumbsup:", ephemeral: true);
                         return;
                     }
