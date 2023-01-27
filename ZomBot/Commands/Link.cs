@@ -215,5 +215,97 @@ namespace ZomBot.Commands {
             } else
                 await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
         }
+
+        [SlashCommand("linkbutton", "Send a message with a button to make linking simpler.")]
+        [RequireContext(ContextType.Guild)]
+        [DefaultMemberPermissions(GuildPermission.ManageRoles)]
+        public async Task LinkButtonCommand() {
+            var button = new ButtonBuilder() {
+                Label = "Link Account",
+                CustomId = "link_button",
+                Style = ButtonStyle.Primary
+            };
+
+            var component = new ComponentBuilder();
+            component.WithButton(button);
+
+            await RespondAsync(components: component.Build());
+        }
+
+        [ComponentInteraction("link_button")]
+        public async Task HandleLinkButton() {
+            await RespondWithModalAsync<LinkModal>("link_modal");
+		}
+
+        [ModalInteraction("link_modal")]
+        public async Task HandleLinkMenu(LinkModal menu) {
+            string name = menu.Name;
+
+            if (Context.Guild is SocketGuild guild) {
+                var ud = Accounts.GetUser(Context.User.Id, guild.Id);
+                // There is absolutely nothing stopping multiple people from linking to the same account.
+                if (ud.playerData.name != null) {
+                    if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
+                        await RespondAsync(":x: You are already linked :x:", ephemeral: true);
+                        return;
+                    }
+                }
+
+                { // player list check
+                    var result = from a in Program.getPDL().players
+                                 where a.name.ToLower().Contains(name.ToLower())
+                                 select a;
+
+                    var player = result.FirstOrDefault();
+                    if (player != null) {
+                        ud.playerData = player;
+                        Accounts.SaveAccounts();
+
+                        if (!ud.blacklisted) {
+                            if (player.team == "human") {
+                                await RoleHandler.JoinHumanTeam(Context.User, guild);
+
+                                if (ud.playerData.clan != null && ud.playerData.clan != "")
+                                    await RoleHandler.JoinClan(Context.User, guild, ud.playerData.clan);
+                            } else if (player.team == "zombie")
+                                await RoleHandler.JoinZombieTeam(Context.User, guild);
+                        }
+
+                        Program.Log($"{player.name} has linked their discord.");
+                        await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
+                        return;
+                    }
+                }
+                { // mod list check
+                    var result = from a in Program.getMDL().players
+                                 where a.name.ToLower().Contains(name.ToLower())
+                                 select a;
+
+                    var player = result.FirstOrDefault();
+                    if (player != null) {
+                        ud.playerData = player;
+                        Accounts.SaveAccounts();
+
+                        if (!ud.blacklisted)
+                            await RoleHandler.JoinModTeam(Context.User, guild);
+
+                        Program.Log($"{player.name} has linked their discord.");
+                        await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
+                        return;
+                    }
+                }
+
+                await RespondAsync($":x: Could not find {name}, check spelling and ensure you appear on the website :x:", ephemeral: true);
+            } else
+                await RespondAsync(":x: How did we get here??? :x:", ephemeral: true);
+        }
     }
+
+    public class LinkModal : IModal {
+        public string Title => "Link Account";
+        
+        [InputLabel("Website Name")]
+        [ModalTextInput("name_input", TextInputStyle.Short, "Your name as it appears on the website. (Not case sensitive)", 3, 50)]
+        public string Name { get; set; }
+	}
 }

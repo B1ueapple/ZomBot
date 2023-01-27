@@ -44,10 +44,10 @@ namespace ZomBot {
 			await _client.StartAsync();
 
 			_handler = new CommandHandler();
-			_interactions = new InteractionHandler();
+			_interactions = new InteractionHandler(_client);
 
 			await _handler.InitializeAsync(_client);
-			await _interactions.InitializeAsync(_client);
+			await _interactions.InitializeAsync();
 
 			_client.Ready += Ready;
 			//await _client.SetGameAsync("HvZ");
@@ -179,7 +179,7 @@ namespace ZomBot {
 				foreach (SocketGuild guild in _client.Guilds) {
 					var g = Accounts.GetGuild(guild);
 
-					bool newDay = DateTimeOffset.FromUnixTimeSeconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds();
+					bool newDay = DateTimeOffset.FromUnixTimeMilliseconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds() && g.gameData.active;
 
 					if (newDay) {
 						g.gameData.tagsToday = 0;
