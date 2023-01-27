@@ -12,7 +12,7 @@ namespace ZomBot.Resources {
 
         public InteractionHandler(DiscordSocketClient client) {
             _client = client;
-            _commands = new InteractionService(_client);
+            _commands = new InteractionService(_client.Rest);
 		}
 
         public async Task InitializeAsync() {
@@ -45,7 +45,7 @@ namespace ZomBot.Resources {
                 await cmd.RespondAsync($":x: {result.ErrorReason} :x:", ephemeral: true);
             }
         }
-
+        
         private async Task HandleSlashCommandAsync(SocketSlashCommand cmd) {
             if (!(cmd is SocketInteraction command) || cmd.User.IsBot) return;
 
@@ -56,8 +56,8 @@ namespace ZomBot.Resources {
                 Console.WriteLine(result.ErrorReason);
                 await cmd.RespondAsync($":x: {result.ErrorReason} :x:", ephemeral: true);
             }
-        }*/
-
+        }
+        */
         public async Task SetupAsync() {
             foreach (SocketGuild guild in _client.Guilds) {
                 var g = Accounts.GetGuild(guild);

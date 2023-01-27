@@ -72,6 +72,7 @@ namespace ZomBot.Commands {
         }
 
         [SlashCommand("unlink", "Unlink your discord from hvz. Does nothing if you aren't currently linked.")]
+        [UserCommand("Unlink")]
         [RequireContext(ContextType.Guild)]
         public async Task UnlinkCommand([Summary("User", "The discord user to unlink. (Defaults to yourself)")] SocketUser user = null) {
             if (Context.Guild is SocketGuild guild) {
