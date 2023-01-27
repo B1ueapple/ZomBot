@@ -16,6 +16,7 @@ Discord bot for running an HVZ Discord server.
 - `/endgame [survivors?]` - End the game (Doesn't affect the website) Input 'true' for survivors if anyone survived. **Requires 'Manage Guild' permission on Discord**
 - `/find {name}` - Find a player's discord by their hvz name.
 - `/link {name}` - Link your discord to hvz. You must be registered on the website first.
+- `/linkbutton` - Send a "Link Account" button in the channel. Clicking the button opens a window to make linking accounts easier. **Requires 'Manage Roles' permission on Discord**
 - `/linkother {user} {name}` - Link someone's discord to hvz. They must be registered on the website first. **Requires 'Manage Roles' permission on Discord**
 - `/startgame` - Start the game. (Doesn't affect the website) **Requires 'Manage Guild' permission on Discord** 
 - `/status [user]` - See a player's hvz related information.
