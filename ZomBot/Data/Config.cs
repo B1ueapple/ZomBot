@@ -20,7 +20,8 @@ namespace ZomBot.Data {
                     apionline = false,
                     apikey = "",
                     hvzwebsite = "",
-                    token = "insert bot token here"
+                    token = "insert bot token here",
+                    timezone = -5
                 };
 
                 string json = JsonConvert.SerializeObject(bot, Formatting.Indented);
@@ -39,5 +40,6 @@ namespace ZomBot.Data {
         public int cachesize; // default 1000, seems fine
         public string apikey; // get api key at '{website}/api/v2/auth/apikey' more api info available at https://github.com/redxdev/hvzsite
         public bool apionline; // set this to true to enable automagic role updating. if website is not up, can cause exceptions
+        public int timezone; // difference in hours between your timezone and website time zone (for mission posting)
     }
 }

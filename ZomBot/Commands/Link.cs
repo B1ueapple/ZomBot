@@ -306,7 +306,7 @@ namespace ZomBot.Commands {
         public string Title => "Link Account";
         
         [InputLabel("Website Name")]
-        [ModalTextInput("name_input", TextInputStyle.Short, "Your name as it appears on the website. (Not case sensitive)", 3, 50)]
+        [ModalTextInput("name_input", TextInputStyle.Short, "Not case sensitive.", 3, 50)]
         public string Name { get; set; }
 	}
 }

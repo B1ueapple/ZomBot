@@ -53,7 +53,7 @@ namespace ZomBot.Data {
 						index = 1
 					}
 				},
-				message = $"%name1% infected {zombie.specialPlayerData.tagsToday} humans today.",
+				message = $"%name1% infected {zombie.specialPlayerData.tagsToday} human{(zombie.specialPlayerData.tagsToday == 1 ? "" : "s")} today.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
 			AddMessage(msg);
@@ -88,7 +88,7 @@ namespace ZomBot.Data {
 		public void EndMessage(bool survivors, int numsurvivors) {
 			var msg = new GameLogMessage() {
 				associatedUsers = new List<GameLogUser>(),
-				message = $"The game has ended{(survivors ? $" with {numsurvivors} survivors" : " with no survivors")}.",
+				message = $"The game has ended{(survivors ? $" with {numsurvivors} survivor{(numsurvivors == 1 ? "" : "s")}" : " with no survivors")}.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
 			AddMessage(msg);
@@ -142,7 +142,7 @@ namespace ZomBot.Data {
 					});
 					break;
 				case GameLogEvents.NEWMVZ:
-					msg.message = $"%name1% has achieved a new high of {num1} infections!";
+					msg.message = $"%name1% has achieved a new high of {num1} infection{(num1 == 1 ? "" : "s")}!";
 					msg.associatedUsers.Add(new GameLogUser() {
 						discordID = assocPlayer.id,
 						discordUsername = assocPlayer.discordUsername,
@@ -151,7 +151,7 @@ namespace ZomBot.Data {
 					});
 					break;
 				case GameLogEvents.ENDOFDAY:
-					msg.message = $"~~ Day ended with {num1} infections and {num2} humans remaining. ~~";
+					msg.message = $"~~ Day ended with {num1} infection{(num1 == 1 ? "" : "s")} and {num2} human{(num2 == 1 ? "" : "s")} remaining. ~~";
 					break;
 				case GameLogEvents.CLANWIPED:
 					msg.message = $"All of '{clan}' has been wiped out!";

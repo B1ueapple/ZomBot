@@ -55,13 +55,14 @@ namespace ZomBot {
 			_client.MessageDeleted += MessageDeleted;
 
 			Timer fiveMinutes = new Timer() {
-				Interval = 300000,
+				Interval = 60000,
 				AutoReset = true,
 				Enabled = true
 			};
 
 			if (Config.bot.apionline && Config.bot.apikey != "") {
 				Log("API ONLINE");
+				Log($"TIMEZONE: {Config.bot.timezone}");
 				fiveMinutes.Elapsed += UpdatePlayers;
 			} else
 				Log("API OFFLINE");
@@ -182,7 +183,6 @@ namespace ZomBot {
 					bool newDay = DateTimeOffset.FromUnixTimeMilliseconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds() && g.gameData.active;
 
 					if (newDay) {
-						g.gameData.tagsToday = 0;
 						g.gameData.daysElapsed++;
 					}
 
@@ -217,16 +217,22 @@ namespace ZomBot {
 										if (player.humansTagged > u.playerData.humansTagged)
 											u.specialPlayerData.tagsToday += player.humansTagged - u.playerData.humansTagged;
 
-										updatedPlayers++;
+										bool updated = false;
+
 										if (u.playerData.team == "zombie" && player.team == "human") { // changed from zombie to human
 											g.gameLog.EventMessage(GameLogEvents.PLAYERCURED, u);
 											u.specialPlayerData.cured = true;
+											updated = true;
 										}
 
 										if (u.playerData.team == "human" && player.team == "zombie") { // infected human
-											g.gameData.tagsToday++;
 											g.gameLog.TagMessage(u);
+											g.gameData.tagsToday++;
+											updated = true;
 										}
+
+										if ((u.playerData?.clan ?? "") != player.clan || (u.playerData?.humansTagged ?? 0) != player.humansTagged)
+											updated = true;
 
 										u.playerData = player;
 
@@ -242,24 +248,32 @@ namespace ZomBot {
 											if (u.specialPlayerData.cured) {
 												g.gameLog.EventMessage(GameLogEvents.WASTEDCURE, u);
 												u.specialPlayerData.cured = false;
+												updated = true;
 											}
 
 											bool isMVZ = mvznum > 0 && u.playerData.humansTagged >= mvznum;
 
 											if (isMVZ && !u.specialPlayerData.isMVZ) {
-												g.gameLog.EventMessage(GameLogEvents.NEWMVZ, u);
+												g.gameLog.EventMessage(GameLogEvents.NEWMVZ, u, num1: mvznum);
 												u.specialPlayerData.isMVZ = isMVZ;
+												updated = true;
 											}
 
-											if (newDay && u.specialPlayerData.tagsToday > 0)
+											if (newDay && u.specialPlayerData.tagsToday > 0) {
 												g.gameLog.ZombieRecapMessage(u);
+												u.specialPlayerData.tagsToday = 0;
+												updated = true;
+											}
 
 											await RoleHandler.JoinZombieTeam(user, guild, isMVZ);
 											await RoleHandler.LeaveClan(user, guild, true); // zombies don't have affiliations with anyone but other zombies
 										}
 
+										if (updated)
+											updatedPlayers++;
+
 										Accounts.SaveAccounts();
-										break; // played updated, next player
+										break; // played found & updated, next player
 									}
 								}
 
@@ -293,8 +307,11 @@ namespace ZomBot {
 							if (cont)
 								continue;
 
-							string b = Resources.Formatting.HtmlToPlainText(m.body);
+							if (m.GetPostDate().ToUnixTimeMilliseconds() > DateTimeOffset.Now.ToUnixTimeMilliseconds())
+								continue; // not right time to post
 
+							string b = Resources.Formatting.HtmlToPlainText(m.body).Replace("  ", " ");
+							
 							if (m.team == "human") {
 								await guild.GetTextChannel(g.channels.humanAnnouncementChannel).SendMessageAsync($"**{m.title}**");
 								await guild.GetTextChannel(g.channels.humanAnnouncementChannel).SendMessageAsync(b);
@@ -332,8 +349,11 @@ namespace ZomBot {
 
 					await _client.SetGameAsync($"with {playerDataList.total - numZombies}h v {numZombies}z");
 
-					if (newDay)
+					if (newDay) {
 						g.gameLog.EventMessage(GameLogEvents.ENDOFDAY, num1: g.gameData.tagsToday, num2: playerDataList.total - numZombies);
+						g.gameData.tagsToday = 0;
+						Accounts.SaveAccounts();
+					}
 				}
 			}
 
@@ -343,7 +363,11 @@ namespace ZomBot {
 
 		private Task Log(LogMessage msg)
 		{
-			Console.WriteLine(msg);
+			if (msg.Exception is GatewayReconnectException)
+				Log("Reconnect");
+			else
+				Console.WriteLine(msg);
+
 			return Task.CompletedTask;
 		}
 

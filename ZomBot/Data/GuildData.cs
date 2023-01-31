@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace ZomBot.Data {
 	public class GuildData {
@@ -53,7 +55,15 @@ namespace ZomBot.Data {
 		public int id;
 		public string title;
 		public string body;
+		public string postDate;
 		public string team;
+
+		public DateTimeOffset GetPostDate() {
+			string pattern = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'";
+
+			DateTimeOffset date = DateTimeOffset.ParseExact(postDate, pattern, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
+			return date.AddHours(Config.bot.timezone);
+		}
 	}
 
 	public struct MissionList { // cannot be changed - based on website api

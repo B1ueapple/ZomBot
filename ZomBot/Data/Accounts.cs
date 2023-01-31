@@ -111,7 +111,8 @@ namespace ZomBot.Data {
                 gameData = new GameData() {
                     active = false,
                     startTime = 0,
-                    daysElapsed = 0
+                    daysElapsed = 0,
+                    tagsToday = 0
                 },
                 gameLog = new GameLog() {
                     messages = new List<GameLogMessage>(),
