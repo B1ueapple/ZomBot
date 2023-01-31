@@ -218,17 +218,26 @@ namespace ZomBot {
 											u.specialPlayerData.tagsToday += player.humansTagged - u.playerData.humansTagged;
 
 										bool updated = false;
+										var tagChannel = guild.GetTextChannel(g.channels.tagChannel);
 
 										if (u.playerData.team == "zombie" && player.team == "human") { // changed from zombie to human
 											g.gameLog.EventMessage(GameLogEvents.PLAYERCURED, u);
 											u.specialPlayerData.cured = true;
 											updated = true;
+											Log($"{u.playerData.name} was cured.");
+											
+											if (tagChannel != null)
+												await tagChannel.SendMessageAsync($"{user.DisplayName} ({u.playerData.name}) was cured!");
 										}
 
 										if (u.playerData.team == "human" && player.team == "zombie") { // infected human
 											g.gameLog.TagMessage(u);
 											g.gameData.tagsToday++;
 											updated = true;
+											Log($"{u.playerData.name} was tagged.");
+
+											if (tagChannel != null)
+												await tagChannel.SendMessageAsync($"{user.DisplayName} ({u.playerData.name}) was tagged!");
 										}
 
 										if ((u.playerData?.clan ?? "") != player.clan || (u.playerData?.humansTagged ?? 0) != player.humansTagged)

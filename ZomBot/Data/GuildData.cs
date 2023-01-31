@@ -48,7 +48,9 @@ namespace ZomBot.Data {
 		public ulong zombieAnnouncementChannel;		// set manually by admin (bot manages perms automagically)
 
 		public List<ulong> modChannels;				// set manually by admin (bot manages perms automagically)
-		public ulong logChannel;					// set manually by admin (bot manages perms automagically)
+		public ulong logChannel;					// created and managed by bot automagically
+
+		public ulong tagChannel;					// set manually by admin (bot manages perms automagically)
 	}
 
 	public struct MissionData { // cannot be changed - based on website api

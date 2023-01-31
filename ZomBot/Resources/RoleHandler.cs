@@ -446,6 +446,18 @@ namespace ZomBot.Resources {
 			OverwritePermissions permsSeeNoSpeak = new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny);
 			OverwritePermissions permsSee = new OverwritePermissions(viewChannel: PermValue.Allow);
 
+			if (channelID == guildAccount.channels.tagChannel) { // tag channel check
+				var channel = guild.GetTextChannel(channelID);
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.mod), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.human), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.GetRole(guildAccount.roleIDs.zombie), permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+					return;
+				}
+			}
+
 			if (channelID == guildAccount.channels.generalAnnouncementChannel) { // general announcement channel check
 				var channel = guild.GetTextChannel(channelID);
 
