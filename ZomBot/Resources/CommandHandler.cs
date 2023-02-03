@@ -21,16 +21,22 @@ namespace ZomBot.Resources {
 		}
 
 		private async Task HandleCommandAsync(SocketMessage s) {
-			if (!(s is SocketUserMessage msg) || s.Author.IsBot) return;
+			if (!(s is SocketUserMessage msg) || s.Author.IsBot || (s?.CleanContent?.Trim() ?? "") == "")
+				return;
 
 			var context = new SocketCommandContext(_client, msg);
-
 			var acc = Accounts.GetUser(context.User, context.Guild);
+
 			if ((acc.discordUsername ?? "") == "")
 				acc.discordUsername = context.User.Username;
 
+			var chatLog = ChatManager.GetChatLog(s.Author);
+			chatLog.AddMessage(msg);
+			ChatManager.SaveChatLogs();
+
 			if (context.Guild != null) {
 				var words = msg.Content.ToLower().Split(' ');
+
 				foreach (string word in words) {
 					if (word == "gun") {
 						await context.Message.ReplyAsync("UwU You thought you could escape? Gotta say Blasters here too, buckaroo.");

@@ -79,6 +79,9 @@ namespace ZomBot {
 
 		private async Task MessageDeleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) {
 			if (message.HasValue && channel.HasValue) {
+				if (message.Value.Author.IsBot || (message.Value?.CleanContent?.Trim() ?? "") == "")
+					return;
+
 				if (channel.Value is SocketGuildChannel c) {
 					var guildAccount = Accounts.GetGuild(c.Guild);
 					var logChannel = c.Guild.GetTextChannel(guildAccount.channels.logChannel);
@@ -94,42 +97,63 @@ namespace ZomBot {
 						logChannel = (SocketTextChannel)ch;
 					}
 
-					EmbedBuilder embed = new EmbedBuilder();
+					var chatLog = ChatManager.GetChatLog(message.Value.Author);
+					chatLog.DeleteMessage(message.Value.Id);
+					ChatManager.SaveChatLogs();
 
-					embed.WithAuthor(message.Value.Author)
-						 .AddField($"Deleted from #{c.Name}", message.Value.CleanContent)
-						 .WithCurrentTimestamp();
+					try {
+						EmbedBuilder embed = new EmbedBuilder();
 
-					await logChannel.SendMessageAsync(embed: embed.Build());
+						embed.WithAuthor(message.Value.Author)
+							 .AddField($"Deleted from #{c.Name}", (message.Value.CleanContent ?? "") == "" ? "no text" : message.Value.CleanContent)
+							 .WithCurrentTimestamp();
+
+						await logChannel.SendMessageAsync(embed: embed.Build());
+					} catch {
+						Log("Couldn't log MessageDelete");
+					}
 				}
 			}
 		}
 
 		private async Task MessageUpdated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channel) {
 			if (before.HasValue && after != null) {
-				if (channel is SocketTextChannel c) {
-					var guildAccount = Accounts.GetGuild(c.Guild);
-					var logChannel = c.Guild.GetTextChannel(guildAccount.channels.logChannel);
-					if (logChannel == null) {
-						List<Overwrite> overwrites = new List<Overwrite> {
-							new Overwrite(c.Guild.EveryoneRole.Id, PermissionTarget.Role, new OverwritePermissions(viewChannel: PermValue.Deny))
-						};
+				if (before.Value.Author.IsBot || (before.Value?.CleanContent?.Trim() ?? "") == "")
+					return;
 
-						ITextChannel ch = await c.Guild.CreateTextChannelAsync("message-log", x => x.PermissionOverwrites = overwrites);
-						guildAccount.channels.logChannel = ch.Id;
-						Accounts.SaveAccounts();
-						logChannel = (SocketTextChannel)ch;
+				if (before.Value.CleanContent != after.CleanContent) {
+					if (channel is SocketTextChannel c) {
+						var guildAccount = Accounts.GetGuild(c.Guild);
+						var logChannel = c.Guild.GetTextChannel(guildAccount.channels.logChannel);
+						if (logChannel == null) {
+							List<Overwrite> overwrites = new List<Overwrite> {
+								new Overwrite(c.Guild.EveryoneRole.Id, PermissionTarget.Role, new OverwritePermissions(viewChannel: PermValue.Deny))
+							};
+
+							ITextChannel ch = await c.Guild.CreateTextChannelAsync("message-log", x => x.PermissionOverwrites = overwrites);
+							guildAccount.channels.logChannel = ch.Id;
+							Accounts.SaveAccounts();
+							logChannel = (SocketTextChannel)ch;
+						}
+
+						var chatLog = ChatManager.GetChatLog(before.Value.Author);
+						chatLog.EditMessage(before.Value.Id, after.CleanContent);
+						ChatManager.SaveChatLogs();
+
+						try {
+							EmbedBuilder embed = new EmbedBuilder();
+
+							embed.WithAuthor(after.Author)
+									.WithCurrentTimestamp()
+									.AddField($"Updated in: #{channel.Name}", (before.Value.CleanContent ?? "") == "" ? "no text" : before.Value.CleanContent)
+									.AddField("Changed to", (after.CleanContent ?? "") == "" ? "no text" : after.CleanContent)
+									.WithCurrentTimestamp();
+
+							await logChannel.SendMessageAsync(embed: embed.Build());
+						} catch {
+							Log("Couldn't log MessageUpdated");
+						}
 					}
-
-					EmbedBuilder embed = new EmbedBuilder();
-
-					embed.WithAuthor(after.Author)
-							.WithCurrentTimestamp()
-							.AddField($"Updated in: #{channel.Name}", before.Value.CleanContent)
-							.AddField("Changed to", after.CleanContent)
-							.WithCurrentTimestamp();
-
-					await logChannel.SendMessageAsync(embed: embed.Build());
 				}
 			}
 		}

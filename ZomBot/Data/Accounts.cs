@@ -9,12 +9,12 @@ namespace ZomBot.Data {
         private static readonly List<GuildData> guildAccounts;
 
         private static readonly string dataFolder = "Data";
-        private static readonly string guildData = "guilds.json";
-        private static readonly string dataFolderAndGuildData = dataFolder + "/" + guildData;
+        private static readonly string dataFile = "guilds.json";
+        private static readonly string dataFolderAndDataFile = dataFolder + "/" + dataFile;
 
         static Accounts() {
-            if (File.Exists($"{dataFolder}/{guildData}")) {
-                guildAccounts = DataStorage.LoadAccounts(dataFolderAndGuildData).ToList();
+            if (File.Exists($"{dataFolder}/{dataFile}")) {
+                guildAccounts = DataStorage.LoadAccounts(dataFolderAndDataFile).ToList();
             } else {
                 guildAccounts = new List<GuildData>();
                 SaveAccounts();
@@ -25,7 +25,7 @@ namespace ZomBot.Data {
             if (!Directory.Exists(dataFolder))
                 Directory.CreateDirectory(dataFolder);
 
-            DataStorage.SaveAccounts(guildAccounts, dataFolderAndGuildData);
+            DataStorage.SaveAccounts(guildAccounts, dataFolderAndDataFile);
         }
 
         public static UserData GetUser(SocketGuildUser user) {
