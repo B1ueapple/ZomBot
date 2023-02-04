@@ -85,10 +85,10 @@ namespace ZomBot.Data {
 			AddMessage(msg);
 		}
 
-		public void EndMessage(bool survivors, int numsurvivors) {
+		public void EndMessage(bool survivors) {
 			var msg = new GameLogMessage() {
 				associatedUsers = new List<GameLogUser>(),
-				message = $"The game has ended{(survivors ? $" with {numsurvivors} survivor{(numsurvivors == 1 ? "" : "s")}" : " with no survivors")}.",
+				message = $"The game has ended{(survivors ? $"" : " with no survivors")}.",
 				time = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 			};
 			AddMessage(msg);

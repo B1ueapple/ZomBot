@@ -3,15 +3,20 @@ using System.IO;
 
 namespace ZomBot.Data {
     class Config {
-        private const string configFolder = "Resources";
+        private const string resourceFolder = "Resources";
         private const string configFile = "config.json";
-        private const string configFolderAndFile = configFolder + "/" + configFile;
+        private const string configFolderAndFile = resourceFolder + "/" + configFile;
+
+        public const string mapFolder = resourceFolder + "/Map";
 
         public static BotConfig bot;
 
         static Config() {
-            if (!Directory.Exists(configFolder))
-                Directory.CreateDirectory(configFolder);
+            if (!Directory.Exists(resourceFolder))
+                Directory.CreateDirectory(resourceFolder);
+
+            if (!Directory.Exists(mapFolder))
+                Directory.CreateDirectory(mapFolder);
 
             if (!File.Exists(configFolderAndFile)) {
                 bot = new BotConfig() {

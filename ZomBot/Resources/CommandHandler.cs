@@ -2,7 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
-using System.Linq;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using ZomBot.Data;
@@ -26,6 +26,7 @@ namespace ZomBot.Resources {
 
 			var context = new SocketCommandContext(_client, msg);
 			var acc = Accounts.GetUser(context.User, context.Guild);
+			var content = msg.CleanContent;
 
 			if ((acc.discordUsername ?? "") == "")
 				acc.discordUsername = context.User.Username;
@@ -35,12 +36,34 @@ namespace ZomBot.Resources {
 			ChatManager.SaveChatLogs();
 
 			if (context.Guild != null) {
-				var words = msg.Content.ToLower().Split(' ');
+				if (!acc.blacklisted) {
+					var words = content.ToLower().Split(' ');
 
-				foreach (string word in words) {
-					if (word == "gun") {
-						await context.Message.ReplyAsync("UwU You thought you could escape? Gotta say Blasters here too, buckaroo.");
-						return;
+					foreach (string word in words) {
+						if (word == "gun") {
+							await context.Message.ReplyAsync("UwU You thought you could escape? Gotta say Blasters here too, buckaroo.");
+							return;
+						}
+					}
+				}
+
+				int index = 0;
+				while (index < content.Length) {
+					string current = content.Substring(index);
+
+					if (current.Contains("[[")) {
+						if (current.Substring(current.IndexOf("[[")).Contains("]]")) {
+							string keyword = current.Substring(current.IndexOf("[[") + 2, current.IndexOf("]]") - current.IndexOf("[[") - 2).ToLower();
+							index += current.IndexOf("]]") + 2;
+
+							if (File.Exists(Config.mapFolder + "/" + keyword + ".png")) {
+								await context.Channel.SendFileAsync(Path.GetFullPath(Config.mapFolder + "/" + keyword + ".png"));
+							}
+						} else {
+							break;
+						}
+					} else {
+						break;
 					}
 				}
 

@@ -204,6 +204,9 @@ namespace ZomBot {
 				foreach (SocketGuild guild in _client.Guilds) {
 					var g = Accounts.GetGuild(guild);
 
+					if (!g.gameData.active)
+						continue;
+
 					bool newDay = DateTimeOffset.FromUnixTimeMilliseconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds() && g.gameData.active;
 
 					if (newDay) {

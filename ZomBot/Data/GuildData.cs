@@ -26,16 +26,10 @@ namespace ZomBot.Data {
 		// transient roles
 		public ulong human;         // given to all humans
 		public ulong zombie;        // given to all zombies
-		public ulong mod;			// given to all mods
+		public ulong mod;			// given to all mods (turns into veteran mod role after game ends)
 		public ulong mvz;			// given to zombie(s) with the most tags
-		public ulong player;        // given to all players (convenience mention for mods)
+		public ulong player;        // given to all players (convenience mention for mods; turns into veteran role after game ends)
 		public ulong cured;			// given to anyone that is turned from zombie -> human
-
-		// roles that persist
-		public ulong survivor;		// awarded if human after end of final night mission
-		public ulong veteran;		// awarded to all players after game concludes
-		public ulong veteranmod;	// awarded to all mods after game concludes
-
 	}
 	
 	public struct ChannelList {
