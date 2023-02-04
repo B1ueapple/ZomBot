@@ -69,7 +69,6 @@ namespace ZomBot {
 
 			try {
 				GetSiteData();
-				await _client.SetGameAsync($"HVZ");
 			} catch {
 				await _client.SetGameAsync($"from the sidelines", null, ActivityType.Watching);
 			};
