@@ -83,9 +83,15 @@ namespace ZomBot.Data {
                 warnings = new List<Warning>(),
                 specialPlayerData = new SpecialPlayerData() {
                     cured = false,
-                    isMVZ = false,
-                    tagsToday = 0
-                }
+                    isMVZ = false
+                },
+                ozApp = new OZApplication() {
+                    applied = false,
+                    experience = "",
+                    rating = "",
+                    time = "",
+                    why = ""
+				}
             };
 
             GetGuild(guildid).userData.Add(newAccount);
@@ -107,17 +113,7 @@ namespace ZomBot.Data {
                     missions = new List<MissionData>()
                 },
                 setupComplete = false,
-                clanList = new List<Clan>(),
-                gameData = new GameData() {
-                    active = false,
-                    startTime = 0,
-                    daysElapsed = 0,
-                    tagsToday = 0
-                },
-                gameLog = new GameLog() {
-                    messages = new List<GameLogMessage>(),
-                    gameStage = 0
-				}
+                clanList = new List<Clan>()
             };
 
             guildAccounts.Add(newAccount);

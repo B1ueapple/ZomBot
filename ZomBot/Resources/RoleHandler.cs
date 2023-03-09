@@ -236,7 +236,7 @@ namespace ZomBot.Resources {
 			}
 		}
 
-		public static async Task LeaveClan(IUser user, SocketGuild guild, bool zombified = false) {
+		public static async Task LeaveClan(IUser user, SocketGuild guild) {
 			var guildData = Accounts.GetGuild(guild.Id);
 			var userButInGuild = guild.GetUser(user.Id);
 			var userRoles = userButInGuild.Roles;
@@ -260,9 +260,6 @@ namespace ZomBot.Resources {
 				if (role.Members.Count() == 0) {
 					await role.DeleteAsync();
 					toRemove.Add(c);
-
-					if (zombified)
-						guildData.gameLog.EventMessage(GameLogEvents.CLANWIPED, clan: c.clanName);
 				}
 			}
 
@@ -485,7 +482,7 @@ namespace ZomBot.Resources {
 			}
 		}
 
-		public static async Task EndGame(SocketGuild guild, bool survivors) {
+		public static async Task EndGame(SocketGuild guild) {
 			await CreateRoles(guild, true);
 			var guildAccount = Accounts.GetGuild(guild);
 			List<ulong> remove = new List<ulong>();
@@ -634,10 +631,6 @@ namespace ZomBot.Resources {
 
 			await pac.SendMessageAsync($"{playerrole.Mention} Please use {cc.Mention} and {ac.Mention} to leave feedback on this HvZ!");
 			await DeleteRoles(guild);
-
-			guildAccount.gameLog.EndMessage(survivors);
-			guildAccount.gameLog.endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-			guildAccount.gameData.active = false;
 			Accounts.SaveAccounts();
 		}
 	}

@@ -33,7 +33,6 @@ namespace ZomBot.Data {
 	public struct SpecialPlayerData {
 		public bool cured;
 		public bool isMVZ;
-		public int tagsToday;
 	}
 	
 	public class PlayerData { // cannot be changed - based on website api

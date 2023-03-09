@@ -220,13 +220,11 @@
     <Compile Include="Commands\EndGame.cs" />
     <Compile Include="Commands\Link.cs" />
     <Compile Include="Commands\Refresh.cs" />
-    <Compile Include="Commands\StartGame.cs" />
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Warn.cs" />
     <Compile Include="Commands\WhoIs.cs" />
     <Compile Include="Data\ChatLog.cs" />
     <Compile Include="Data\Config.cs" />
-    <Compile Include="Data\GameLog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\Accounts.cs" />

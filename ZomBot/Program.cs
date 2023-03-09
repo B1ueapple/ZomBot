@@ -203,15 +203,6 @@ namespace ZomBot {
 				foreach (SocketGuild guild in _client.Guilds) {
 					var g = Accounts.GetGuild(guild);
 
-					if (!g.gameData.active)
-						continue;
-
-					bool newDay = DateTimeOffset.FromUnixTimeMilliseconds(g.gameData.startTime).AddDays(g.gameData.daysElapsed + 1).ToUnixTimeMilliseconds() <= DateTimeOffset.Now.ToUnixTimeMilliseconds() && g.gameData.active;
-
-					if (newDay) {
-						g.gameData.daysElapsed++;
-					}
-
 					int mvznum = 0;
 					int numZombies = 0;
 					foreach (PlayerData pl in playerDataList.players) { // update needed count for mvz
@@ -240,14 +231,10 @@ namespace ZomBot {
 										if (u.playerData.team == player.team && player.team == "human" && u.playerData.clan == player.clan)
 												break; // nothing changed, continue to next user
 
-										if (player.humansTagged > u.playerData.humansTagged)
-											u.specialPlayerData.tagsToday += player.humansTagged - u.playerData.humansTagged;
-
 										bool updated = false;
 										var tagChannel = guild.GetTextChannel(g.channels.tagChannel);
 
 										if (u.playerData.team == "zombie" && player.team == "human") { // changed from zombie to human
-											g.gameLog.EventMessage(GameLogEvents.PLAYERCURED, u);
 											u.specialPlayerData.cured = true;
 											updated = true;
 											Log($"{u.playerData.name} was cured.");
@@ -257,8 +244,6 @@ namespace ZomBot {
 										}
 
 										if (u.playerData.team == "human" && player.team == "zombie") { // infected human
-											g.gameLog.TagMessage(u);
-											g.gameData.tagsToday++;
 											updated = true;
 											Log($"{u.playerData.name} was tagged.");
 
@@ -281,7 +266,6 @@ namespace ZomBot {
 										} else if (u.playerData.team == "zombie") {
 											numZombies++;
 											if (u.specialPlayerData.cured) {
-												g.gameLog.EventMessage(GameLogEvents.WASTEDCURE, u);
 												u.specialPlayerData.cured = false;
 												updated = true;
 											}
@@ -289,19 +273,12 @@ namespace ZomBot {
 											bool isMVZ = mvznum > 0 && u.playerData.humansTagged >= mvznum;
 
 											if (isMVZ && !u.specialPlayerData.isMVZ) {
-												g.gameLog.EventMessage(GameLogEvents.NEWMVZ, u, num1: mvznum);
 												u.specialPlayerData.isMVZ = isMVZ;
 												updated = true;
 											}
 
-											if (newDay && u.specialPlayerData.tagsToday > 0) {
-												g.gameLog.ZombieRecapMessage(u);
-												u.specialPlayerData.tagsToday = 0;
-												updated = true;
-											}
-
 											await RoleHandler.JoinZombieTeam(user, guild, isMVZ);
-											await RoleHandler.LeaveClan(user, guild, true); // zombies don't have affiliations with anyone but other zombies
+											await RoleHandler.LeaveClan(user, guild); // zombies don't have affiliations with anyone but other zombies
 										}
 
 										if (updated)
@@ -373,22 +350,7 @@ namespace ZomBot {
 						}
 					}
 
-					if ((playerDataList.total/4) < numZombies)
-						g.gameLog.EventMessage(GameLogEvents.QUARTERTAGGED);
-
-					if ((playerDataList.total/2) < numZombies)
-						g.gameLog.EventMessage(GameLogEvents.HALFTAGGED);
-
-					if ((playerDataList.total * (3.0f/4.0f)) < numZombies)
-						g.gameLog.EventMessage(GameLogEvents.THREEQUARTERSTAGGED);
-
 					await _client.SetGameAsync($"with {playerDataList.total - numZombies}h v {numZombies}z");
-
-					if (newDay) {
-						g.gameLog.EventMessage(GameLogEvents.ENDOFDAY, num1: g.gameData.tagsToday, num2: playerDataList.total - numZombies);
-						g.gameData.tagsToday = 0;
-						Accounts.SaveAccounts();
-					}
 				}
 			}
 

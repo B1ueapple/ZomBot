@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ZomBot.Data;
@@ -15,6 +14,11 @@ namespace ZomBot.Commands {
             if (Context.Guild is SocketGuild guild) {
                 var ud = Accounts.GetUser(Context.User.Id, guild.Id);
                 // There is absolutely nothing stopping multiple people from linking to the same account.
+                if (!Config.bot.apionline) {
+                    await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                    return;
+				}
+
                 if (ud.playerData.name != null) {
                     if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
                         await RespondAsync(":x: You are already linked :x:", ephemeral: true);
@@ -109,6 +113,11 @@ namespace ZomBot.Commands {
         [RequireContext(ContextType.Guild)]
         [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         public async Task LinkOtherCommand([Summary("User", "The discord user to link.")] SocketUser user, [Summary("Name", "Their name as spelled on the website. (Not case sensitive)")] string name) {
+            if (!Config.bot.apionline) {
+                await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                return;
+            }
+
             if (Context.Guild is SocketGuild guild) {
                 var ud = Accounts.GetUser(user.Id, guild.Id);
 
@@ -242,6 +251,11 @@ namespace ZomBot.Commands {
 
         [ComponentInteraction("link_button")]
         public async Task HandleLinkButton() {
+            if (!Config.bot.apionline) {
+                await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                return;
+            }
+
             await RespondWithModalAsync<LinkModal>("link_modal");
 		}
 
@@ -263,6 +277,11 @@ namespace ZomBot.Commands {
         [ModalInteraction("link_modal")]
         public async Task HandleLinkMenu(LinkModal menu) {
             string name = menu.Name.Trim();
+
+            if (!Config.bot.apionline) {
+                await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                return;
+            }
 
             if (Context.Guild is SocketGuild guild) {
                 var ud = Accounts.GetUser(Context.User.Id, guild.Id);
