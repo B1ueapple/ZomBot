@@ -9,6 +9,7 @@ namespace ZomBot.Data {
 		public bool blacklisted;
 		public List<Warning> warnings;
 		public SpecialPlayerData specialPlayerData;
+		public OZApplication ozApp;
 
 		public void AddWarning(IUser issuer, string reason) {
 			if (blacklisted)
@@ -48,5 +49,13 @@ namespace ZomBot.Data {
 		public ulong issuer;
 		public string reason;
 		public long time;
+	}
+
+	public struct OZApplication {
+		public bool applied;
+		public string rating;
+		public string time;
+		public string experience;
+		public string why;
 	}
 }

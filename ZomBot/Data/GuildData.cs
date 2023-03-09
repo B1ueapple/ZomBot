@@ -26,10 +26,12 @@ namespace ZomBot.Data {
 		// transient roles
 		public ulong human;         // given to all humans
 		public ulong zombie;        // given to all zombies
-		public ulong mod;			// given to all mods (turns into veteran mod role after game ends)
 		public ulong mvz;			// given to zombie(s) with the most tags
-		public ulong player;        // given to all players (convenience mention for mods; turns into veteran role after game ends)
 		public ulong cured;			// given to anyone that is turned from zombie -> human
+
+		// static roles
+		public ulong player;        // given to all players (convenience mention for mods; turns into veteran role after game ends)
+		public ulong mod;			// given to all mods (turns into veteran mod role after game ends)
 	}
 	
 	public struct ChannelList {
@@ -42,6 +44,7 @@ namespace ZomBot.Data {
 		public ulong zombieAnnouncementChannel;		// set manually by admin (bot manages perms automagically)
 
 		public List<ulong> modChannels;				// set manually by admin (bot manages perms automagically)
+		public ulong modImportantChannel;			// set manually by admin (bot manages perms automagically)
 		public ulong logChannel;					// created and managed by bot automagically
 
 		public ulong tagChannel;					// set manually by admin (bot manages perms automagically)

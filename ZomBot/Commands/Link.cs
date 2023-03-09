@@ -221,14 +221,21 @@ namespace ZomBot.Commands {
         [RequireContext(ContextType.Guild)]
         [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         public async Task LinkButtonCommand() {
-            var button = new ButtonBuilder() {
+            var linkbutton = new ButtonBuilder() {
                 Label = "Link Account",
                 CustomId = "link_button",
                 Style = ButtonStyle.Primary
             };
 
+            var ozbutton = new ButtonBuilder() {
+                Label = "Apply for OZ",
+                CustomId = "oz_button",
+                Style = ButtonStyle.Danger
+            };
+
             var component = new ComponentBuilder();
-            component.WithButton(button);
+            component.WithButton(linkbutton);
+            component.WithButton(ozbutton);
 
             await RespondAsync(components: component.Build());
         }
@@ -238,9 +245,24 @@ namespace ZomBot.Commands {
             await RespondWithModalAsync<LinkModal>("link_modal");
 		}
 
+        [ComponentInteraction("oz_button")]
+        public async Task HandleOZButton() {
+            var user = Accounts.GetUser(Context.User, Context.Guild);
+
+            if (user?.playerData?.name != null) {
+                if (!(user?.ozApp.applied ?? false)) {
+                    await RespondWithModalAsync<OZModal>("oz_modal");
+                } else {
+                    await RespondAsync(":x: You have already submitted an application :x:", ephemeral: true);
+				}
+			} else {
+                await RespondAsync(":x: You are not linked! Use the link button to link your account first :x:", ephemeral: true);
+			}
+		}
+
         [ModalInteraction("link_modal")]
         public async Task HandleLinkMenu(LinkModal menu) {
-            string name = menu.Name;
+            string name = menu.Name.Trim();
 
             if (Context.Guild is SocketGuild guild) {
                 var ud = Accounts.GetUser(Context.User.Id, guild.Id);
@@ -300,13 +322,75 @@ namespace ZomBot.Commands {
             } else
                 await RespondAsync(":x: How did we get here??? :x:", ephemeral: true);
         }
+
+        [ModalInteraction("oz_modal")]
+        public async Task HandleOZMenu(OZModal menu) {
+            string rating = menu.Rating.Trim();
+            string time = menu.Time.Trim();
+            string experience = menu.Experience.Trim();
+            string why = menu.Why.Trim();
+
+            var guild = Accounts.GetGuild(Context.Guild);
+            var user = Accounts.GetUser(Context.User, Context.Guild);
+
+            if (user.ozApp.applied) {
+                await RespondAsync(":x: You have already submitted an application :x:");
+                return;
+			}
+
+            user.ozApp = new OZApplication() {
+                applied = true,
+                rating = rating,
+                time = time,
+                experience = experience,
+                why = why
+            };
+
+            var mic = await Context.Guild.GetTextChannelAsync(guild.channels.modImportantChannel);
+
+            var eb = new EmbedBuilder()
+                .WithCurrentTimestamp()
+                .WithAuthor(Context.User)
+                .WithTitle("**OZ Application**")
+                .AddField("Website Name (Discord Username)", $"{user.playerData.name} ({Context.User.Username})")
+                .AddField("How eager are you to be OZ on a scale of 1-10 (10 is the highest)", rating)
+                .AddField("When do you plan to start playing on Monday?", time)
+                .AddField("How many semesters of HvZ have you played?", experience)
+                .AddField("Why would you like to be an OZ?", why == "" ? "No answer given." : why);
+            
+            if (mic != null)
+                await mic.SendMessageAsync(embed: eb.Build());
+            
+            Accounts.SaveAccounts();
+            await RespondAsync($":thumbsup: Application submitted. Remember that if you are chosen as an OZ, you are expected to commit heavily to playing until a at least a few tags are made. :thumbsup:", ephemeral: true);
+        }
     }
 
     public class LinkModal : IModal {
         public string Title => "Link Account";
         
-        [InputLabel("Website Name")]
+        [InputLabel("Your name (as it appears on the website)")]
         [ModalTextInput("name_input", TextInputStyle.Short, "Not case sensitive.", 3, 50)]
         public string Name { get; set; }
 	}
+
+    public class OZModal : IModal {
+        public string Title => "OZ Application";
+        // 45 char label limit??? whack.
+        [InputLabel("How eager are you to be OZ on a scale of 1-10")]
+        [ModalTextInput("rating_input", TextInputStyle.Short, "10 is the highest.", 1)]
+        public string Rating { get; set; }
+
+        [InputLabel("When do you plan to start playing on Monday?")]
+        [ModalTextInput("time_input", TextInputStyle.Short, "Assuming the game starts at 6am.", 1)]
+        public string Time { get; set; }
+
+        [InputLabel("How many semesters of HvZ have you played?")]
+        [ModalTextInput("exp_input", TextInputStyle.Short, "0? 5? 9354?", 1)]
+        public string Experience { get; set; }
+
+        [InputLabel("Why would you like to be an OZ?")]
+        [ModalTextInput("why_input", TextInputStyle.Paragraph, "Optional.", 0, 1000)]
+        public string Why { get; set; }
+    }
 }

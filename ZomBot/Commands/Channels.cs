@@ -7,6 +7,50 @@ using ZomBot.Resources;
 
 namespace ZomBot.Commands {
     public class Channels : InteractionModuleBase {
+        [SlashCommand("mic", "Set the current channel as a mod important channel.")]
+        [RequireContext(ContextType.Guild)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
+        public async Task SetModImportantChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
+            if (Context.Guild is SocketGuild guild) {
+                var guildAccount = Accounts.GetGuild(guild);
+                ulong channelID = Context.Channel.Id;
+
+                if (reset) {
+                    if (guildAccount.channels.modImportantChannel == channelID) {
+                        guildAccount.channels.modImportantChannel = 0;
+                        Accounts.SaveAccounts();
+                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer the mod important channel :thumbsup:", ephemeral: true);
+                    } else
+                        await RespondAsync($":x: #{Context.Channel.Name} is not the mod important channel :x:", ephemeral: true);
+
+                    return;
+                }
+
+                guildAccount.channels.modChannels.Remove(channelID);
+                guildAccount.channels.humanChannels.Remove(channelID);
+                guildAccount.channels.zombieChannels.Remove(channelID);
+
+                if (guildAccount.channels.humanAnnouncementChannel == channelID)
+                    guildAccount.channels.humanAnnouncementChannel = 0;
+                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
+                    guildAccount.channels.zombieAnnouncementChannel = 0;
+                else if (guildAccount.channels.tagChannel == channelID)
+                    guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.generalAnnouncementChannel == channelID)
+                    guildAccount.channels.generalAnnouncementChannel = 0;
+
+                if (guildAccount.channels.modImportantChannel != channelID) {
+                    guildAccount.channels.modImportantChannel = channelID;
+                    Accounts.SaveAccounts();
+                    RoleHandler.UpdateChannel(channelID, guild);
+                    await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the mod important channel :thumbsup:", ephemeral: true);
+                    return;
+                } else
+                    await RespondAsync($":question: #{Context.Channel.Name} is already the mod important channel :question:", ephemeral: true);
+            } else
+                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+        }
+
         [SlashCommand("zc", "Set the current channel as a zombie text channel.")]
         [RequireContext(ContextType.Guild)]
         [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
@@ -36,6 +80,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.zombieAnnouncementChannel = 0;
                 else if (guildAccount.channels.tagChannel == channelID)
                     guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (!guildAccount.channels.zombieChannels.Contains(channelID)) {
                     guildAccount.channels.zombieChannels.Add(channelID);
@@ -78,6 +124,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.zombieAnnouncementChannel = 0;
                 else if (guildAccount.channels.tagChannel == channelID)
                     guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (!guildAccount.channels.humanChannels.Contains(channelID)) {
                     guildAccount.channels.humanChannels.Add(channelID);
@@ -120,6 +168,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.zombieAnnouncementChannel = 0;
                 else if (guildAccount.channels.tagChannel == channelID)
                     guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (!guildAccount.channels.modChannels.Contains(channelID)) {
                     guildAccount.channels.modChannels.Add(channelID);
@@ -162,6 +212,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.zombieAnnouncementChannel = 0;
                 else if (guildAccount.channels.tagChannel == channelID)
                     guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (guildAccount.channels.generalAnnouncementChannel != channelID) {
                     guildAccount.channels.generalAnnouncementChannel = channelID;
@@ -204,6 +256,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.generalAnnouncementChannel = 0;
                 else if (guildAccount.channels.tagChannel == channelID)
                     guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (guildAccount.channels.zombieAnnouncementChannel != channelID) {
                     guildAccount.channels.zombieAnnouncementChannel = channelID;
@@ -246,6 +300,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.zombieAnnouncementChannel = 0;
                 else if (guildAccount.channels.tagChannel == channelID)
                     guildAccount.channels.tagChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (guildAccount.channels.humanAnnouncementChannel != channelID) {
                     guildAccount.channels.humanAnnouncementChannel = channelID;
@@ -288,6 +344,8 @@ namespace ZomBot.Commands {
                     guildAccount.channels.humanAnnouncementChannel = 0;
                 else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
                     guildAccount.channels.zombieAnnouncementChannel = 0;
+                else if (guildAccount.channels.modImportantChannel == channelID)
+                    guildAccount.channels.modImportantChannel = 0;
 
                 if (guildAccount.channels.tagChannel != channelID) {
                     guildAccount.channels.tagChannel = channelID;
