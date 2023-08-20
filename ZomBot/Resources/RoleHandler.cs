@@ -116,7 +116,7 @@ namespace ZomBot.Resources {
 			var guildAccount = Accounts.GetGuild(guild);
 			var roles = guild.Roles;
 
-			{ // mod role
+			{ // mod -> veteran mod role
 				var temprole = from r in roles where r.Id == guildAccount.roleIDs.mod select r;
 				var role = temprole.FirstOrDefault();
 
@@ -171,14 +171,14 @@ namespace ZomBot.Resources {
 				}
 			}
 
-			{ // human role
-				var temprole = from r in roles where r.Id == guildAccount.roleIDs.human select r;
+			{ // player -> veteran role
+				var temprole = from r in roles where r.Id == guildAccount.roleIDs.player select r;
 				var role = temprole.FirstOrDefault();
 
 				if (role != null) {
-					guildAccount.roleIDs.human = 0;
+					guildAccount.roleIDs.player = 0;
 					await guild.GetRole(role.Id).ModifyAsync(x => x.Name = "Veteran");
-					Console.WriteLine("Updated human role.");
+					Console.WriteLine("Updated player role.");
 				}
 			}
 
@@ -546,59 +546,70 @@ namespace ZomBot.Resources {
 				}
 			}
 
+			{
+				var tempchannel = from c in channels where c.Id == guildAccount.channels.modImportantChannel select c;
+				var channel = tempchannel.FirstOrDefault();
+
+				if (channel != null) {
+					await channel.AddPermissionOverwriteAsync(modrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
+			}
+
 			if (guildAccount.channels.modChannels.Count > 0)
 				foreach (ulong channelID in guildAccount.channels.modChannels) {
-				var tempchannel = from c in channels
-							 where c.Id == channelID
-							 select c;
+					var tempchannel = from c in channels
+								 where c.Id == channelID
+								 select c;
 
-				var channel = tempchannel.FirstOrDefault();
-				if (channel == null)
-					continue;
+					var channel = tempchannel.FirstOrDefault();
+					if (channel == null)
+						continue;
 
-				if (channel == null)
-					continue;
+					if (channel == null)
+						continue;
 
-				await channel.AddPermissionOverwriteAsync(modrole, permsSee);
-				await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-			}
+					await channel.AddPermissionOverwriteAsync(modrole, permsSee);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
 
 			if (guildAccount.channels.humanChannels.Count > 0)
 				foreach (ulong channelID in guildAccount.channels.humanChannels) {
-				var tempchannel = from c in channels
-								  where c.Id == channelID
-								  select c;
+					var tempchannel = from c in channels
+									  where c.Id == channelID
+									  select c;
 
-				var channel = tempchannel.FirstOrDefault();
-				if (channel == null)
-					continue;
+					var channel = tempchannel.FirstOrDefault();
+					if (channel == null)
+						continue;
 
-				if (channel == null)
-					continue;
+					if (channel == null)
+						continue;
 
-				await channel.AddPermissionOverwriteAsync(modrole, permsSeeNoSpeak);
-				await channel.AddPermissionOverwriteAsync(playerrole, permsSeeNoSpeak);
-				await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-			}
+					await channel.AddPermissionOverwriteAsync(modrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(playerrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
 
 			if (guildAccount.channels.zombieChannels.Count > 0)
 				foreach (ulong channelID in guildAccount.channels.zombieChannels) {
-				var tempchannel = from c in channels
-								  where c.Id == channelID
-								  select c;
+					var tempchannel = from c in channels
+									  where c.Id == channelID
+									  select c;
 
-				var channel = tempchannel.FirstOrDefault();
-				if (channel == null)
-					continue;
+					var channel = tempchannel.FirstOrDefault();
+					if (channel == null)
+						continue;
 
-				if (channel == null)
-					continue;
+					if (channel == null)
+						continue;
 
-				await channel.AddPermissionOverwriteAsync(modrole, permsSeeNoSpeak);
-				await channel.AddPermissionOverwriteAsync(playerrole, permsSeeNoSpeak);
-				await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
-			}
+					await channel.AddPermissionOverwriteAsync(modrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(playerrole, permsSeeNoSpeak);
+					await channel.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
+				}
 
+			guildAccount.channels.modImportantChannel = 0;
 			guildAccount.channels.generalAnnouncementChannel = 0;
 			guildAccount.channels.humanAnnouncementChannel = 0;
 			guildAccount.channels.zombieAnnouncementChannel = 0;
@@ -629,7 +640,7 @@ namespace ZomBot.Resources {
 			await ac.AddPermissionOverwriteAsync(playerrole, permsSee);
 			await ac.AddPermissionOverwriteAsync(guild.EveryoneRole, permsNoSee);
 
-			await pac.SendMessageAsync($"{playerrole.Mention} Please use {cc.Mention} and {ac.Mention} to leave feedback on this HvZ!");
+			await pac.SendMessageAsync($"{playerrole.Mention} Please use {cc.Mention} and {ac.Mention} to leave your feedback of your experiences during this semester's HvZ!");
 			await DeleteRoles(guild);
 			Accounts.SaveAccounts();
 		}

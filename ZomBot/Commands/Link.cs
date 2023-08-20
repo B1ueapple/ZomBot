@@ -267,7 +267,7 @@ namespace ZomBot.Commands {
                 if (!(user?.ozApp.applied ?? false)) {
                     await RespondWithModalAsync<OZModal>("oz_modal");
                 } else {
-                    await RespondAsync(":x: You have already submitted an application :x:", ephemeral: true);
+                    await RespondAsync(":x: You have already submitted an application, if you believe this to be a mistake please let a mod know :x:", ephemeral: true);
 				}
 			} else {
                 await RespondAsync(":x: You are not linked! Use the link button to link your account first :x:", ephemeral: true);
@@ -352,7 +352,7 @@ namespace ZomBot.Commands {
             var guild = Accounts.GetGuild(Context.Guild);
             var user = Accounts.GetUser(Context.User, Context.Guild);
 
-            if (user.ozApp.applied) {
+            if (user?.ozApp.applied ?? false) {
                 await RespondAsync(":x: You have already submitted an application :x:");
                 return;
 			}
@@ -397,19 +397,19 @@ namespace ZomBot.Commands {
         public string Title => "OZ Application";
         // 45 char label limit??? whack.
         [InputLabel("How eager are you to be OZ on a scale of 1-10")]
-        [ModalTextInput("rating_input", TextInputStyle.Short, "10 is the highest.", 1)]
+        [ModalTextInput("rating_input", TextInputStyle.Short, "10 is the highest.", 1, 10)]
         public string Rating { get; set; }
 
         [InputLabel("When do you plan to start playing on Monday?")]
-        [ModalTextInput("time_input", TextInputStyle.Short, "Assuming the game starts at 6am.", 1)]
+        [ModalTextInput("time_input", TextInputStyle.Short, "Assuming the game starts at 6am.", 1, 50)]
         public string Time { get; set; }
 
         [InputLabel("How many semesters of HvZ have you played?")]
-        [ModalTextInput("exp_input", TextInputStyle.Short, "0? 5? 9354?", 1)]
+        [ModalTextInput("exp_input", TextInputStyle.Short, "0? 5? 9354? Experience is not required.", 1, 50)]
         public string Experience { get; set; }
 
         [InputLabel("Why would you like to be an OZ?")]
-        [ModalTextInput("why_input", TextInputStyle.Paragraph, "Optional.", 0, 1000)]
+        [ModalTextInput("why_input", TextInputStyle.Paragraph, "Optional.", 0, 800)]
         public string Why { get; set; }
     }
 }

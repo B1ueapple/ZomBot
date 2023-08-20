@@ -64,14 +64,16 @@ namespace ZomBot {
 				Log("API ONLINE");
 				Log($"TIMEZONE: {Config.bot.timezone}");
 				fiveMinutes.Elapsed += UpdatePlayers;
-			} else
-				Log("API OFFLINE");
 
-			try {
-				GetSiteData();
-			} catch {
-				await _client.SetGameAsync($"from the sidelines", null, ActivityType.Watching);
-			};
+				try {
+					GetSiteData();
+				} catch {
+					await _client.SetGameAsync($"from the sidelines", null, ActivityType.Watching);
+				};
+			} else {
+				await _client.SetGameAsync($"with myself...", null, ActivityType.Playing);
+				Log("API OFFLINE");
+			}
 
 			await Task.Delay(-1);
 		}
@@ -189,6 +191,7 @@ namespace ZomBot {
 			modDataList = JsonConvert.DeserializeObject<ModDataList>(rawModData);
 			missionList = JsonConvert.DeserializeObject<MissionList>(rawMissionData);
 		}
+
 		private async void UpdatePlayers(object sender, ElapsedEventArgs e) {
 			try {
 				GetSiteData();
