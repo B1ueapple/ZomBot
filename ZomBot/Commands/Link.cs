@@ -15,13 +15,13 @@ namespace ZomBot.Commands {
                 var ud = Accounts.GetUser(Context.User.Id, guild.Id);
                 // There is absolutely nothing stopping multiple people from linking to the same account.
                 if (!Config.bot.apionline) {
-                    await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                    await RespondAsync(":x: Linking is currently disabled.", ephemeral: true);
                     return;
 				}
 
                 if (ud.playerData.name != null) {
                     if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
-                        await RespondAsync(":x: You are already linked :x:", ephemeral: true);
+                        await RespondAsync(":x: You are already linked.", ephemeral: true);
                         return;
                     }
                 }
@@ -46,8 +46,8 @@ namespace ZomBot.Commands {
                                 await RoleHandler.JoinZombieTeam(Context.User, guild);
                         }
 
-                        Program.Log($"{player.name} has linked their discord.");
-                        await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
+                        Program.Info($"{player.name} has linked their discord.");
+                        await RespondAsync($":white_check_mark: You have successfully linked your account to {player.name}.", ephemeral: true);
                         return;
                     }
                 }
@@ -64,15 +64,15 @@ namespace ZomBot.Commands {
                         if (!ud.blacklisted)
                             await RoleHandler.JoinModTeam(Context.User, guild);
 
-                        Program.Log($"{player.name} has linked their discord.");
-                        await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
+                        Program.Info($"{player.name} has linked their discord.");
+                        await RespondAsync($":white_check_mark: You have successfully linked your account to {player.name}.", ephemeral: true);
                         return;
                     }
                 }
 
-                await RespondAsync($":x: Could not find {name}, check spelling and ensure you appear on the website :x:", ephemeral: true);
+                await RespondAsync($":x: Could not find {name}, check spelling and ensure you appear on the website.", ephemeral: true);
             } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+                await RespondAsync(":x: This command can't be used here.", ephemeral: true);
         }
 
         [SlashCommand("unlink", "Unlink your discord from hvz. Does nothing if you aren't currently linked.")]
@@ -84,7 +84,7 @@ namespace ZomBot.Commands {
                     var sender = await Context.Guild.GetUserAsync(Context.User.Id);
 
                     if (!sender.GuildPermissions.ManageRoles) {
-                        await RespondAsync(":x: You don't have permission to do that :x:", ephemeral: true);
+                        await RespondAsync(":x: You don't have permission to do that.", ephemeral: true);
                         return;
                     }
                 }
@@ -92,7 +92,7 @@ namespace ZomBot.Commands {
                 var ud = Accounts.GetUser(user ?? Context.User, guild);
 
                 if (ud.playerData.name != null && ud.playerData.name != "") {
-                    Program.Log($"{ud.playerData.name} has unlinked their account.");
+                    Program.Info($"{ud.playerData.name} has unlinked their account.");
                     PlayerData p = new PlayerData {
                         name = ""
                     };
@@ -100,13 +100,13 @@ namespace ZomBot.Commands {
                     ud.playerData = p;
 
                     await RoleHandler.LeaveTeams(user ?? Context.User, guild);
-                    await RespondAsync($":thumbsup: You have successfully unlinked {(user != null ? (user.Username + "'s") : "your")} account :thumbsup:", ephemeral: true);
+                    await RespondAsync($":white_check_mark: You have successfully unlinked {(user != null ? (user.Username + "'s") : "your")} account.", ephemeral: true);
                     return;
                 }
 
-                await RespondAsync(":x: You aren't linked :x:", ephemeral: true);
+                await RespondAsync(":x: You aren't linked.", ephemeral: true);
             } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+                await RespondAsync(":x: This command can't be used here.", ephemeral: true);
         }
 
         [SlashCommand("linkother", "Link someone's discord to hvz. They must be registered on the website first.")]
@@ -114,7 +114,7 @@ namespace ZomBot.Commands {
         [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         public async Task LinkOtherCommand([Summary("User", "The discord user to link.")] SocketUser user, [Summary("Name", "Their name as spelled on the website. (Not case sensitive)")] string name) {
             if (!Config.bot.apionline) {
-                await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                await RespondAsync(":x: Linking is currently disabled.", ephemeral: true);
                 return;
             }
 
@@ -123,7 +123,7 @@ namespace ZomBot.Commands {
 
                 if (ud.playerData.name != null) {
                     if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
-                        await RespondAsync(":x: They are already linked :x:", ephemeral: true);
+                        await RespondAsync(":x: They are already linked.", ephemeral: true);
                         return;
                     }
                 }
@@ -144,8 +144,8 @@ namespace ZomBot.Commands {
                                 await RoleHandler.JoinZombieTeam(user, guild);
                         }
 
-                        Program.Log($"{player.name} has been linked by {Context.User.Username}.");
-                        await RespondAsync($":thumbsup: You have successfully linked their account to {player.name} :thumbsup:", ephemeral: true);
+                        Program.Info($"{player.name} has been linked by {Context.User.Username}.");
+                        await RespondAsync($":white_check_mark: You have successfully linked their account to {player.name}.", ephemeral: true);
                         return;
                     }
                 }
@@ -162,15 +162,15 @@ namespace ZomBot.Commands {
                         if (!ud.blacklisted)
                             await RoleHandler.JoinModTeam(user, guild);
 
-                        Program.Log($"{player.name} has been linked by {Context.User.Username}.");
-                        await RespondAsync($":thumbsup: You have successfully linked their account to {player.name} :thumbsup:", ephemeral: true);
+                        Program.Info($"{player.name} has been linked by {Context.User.Username}.");
+                        await RespondAsync($":white_check_mark: You have successfully linked their account to {player.name}.", ephemeral: true);
                         return;
                     }
                 }
 
-                await RespondAsync($":x: Could not find {name}, check spelling and ensure they appear on the website :x:", ephemeral: true);
+                await RespondAsync($":x: Could not find {name}, check spelling and ensure they appear on the website.", ephemeral: true);
             } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+                await RespondAsync(":x: This command can't be used here.", ephemeral: true);
         }
 
         [SlashCommand("checklinked", "List all linked and unlinked players.")]
@@ -223,7 +223,7 @@ namespace ZomBot.Commands {
                 //                                                              v makes the list too long for discord
                 await RespondAsync($"```\nMISSING\n{listUnlinked}```" /*+ "\n```\nPRESENT\n{list}```"*/ + (dupes2electricboogaloo.Length > 0 ? $"\n```\nDUPLICATE LINKS\n{dupes2electricboogaloo}```" : ""), ephemeral: true);
             } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+                await RespondAsync(":x: This command can't be used here.", ephemeral: true);
         }
 
         [SlashCommand("linkbutton", "Send a message with a button to make linking simpler.")]
@@ -252,7 +252,7 @@ namespace ZomBot.Commands {
         [ComponentInteraction("link_button")]
         public async Task HandleLinkButton() {
             if (!Config.bot.apionline) {
-                await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                await RespondAsync(":x: Linking is currently disabled.", ephemeral: true);
                 return;
             }
 
@@ -267,10 +267,10 @@ namespace ZomBot.Commands {
                 if (!(user?.ozApp.applied ?? false)) {
                     await RespondWithModalAsync<OZModal>("oz_modal");
                 } else {
-                    await RespondAsync(":x: You have already submitted an application, if you believe this to be a mistake please let a mod know :x:", ephemeral: true);
+                    await RespondAsync(":x: You have already submitted an application. If you believe this to be a mistake please let a mod know.", ephemeral: true);
 				}
 			} else {
-                await RespondAsync(":x: You are not linked! Use the link button to link your account first :x:", ephemeral: true);
+                await RespondAsync(":x: You are not linked! Use the link button to link your account first.", ephemeral: true);
 			}
 		}
 
@@ -279,7 +279,7 @@ namespace ZomBot.Commands {
             string name = menu.Name.Trim();
 
             if (!Config.bot.apionline) {
-                await RespondAsync(":x: Linking is currently unavailable :x:", ephemeral: true);
+                await RespondAsync(":x: Linking is currently unavailable.", ephemeral: true);
                 return;
             }
 
@@ -288,7 +288,7 @@ namespace ZomBot.Commands {
                 // There is absolutely nothing stopping multiple people from linking to the same account.
                 if (ud.playerData.name != null) {
                     if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
-                        await RespondAsync(":x: You are already linked :x:", ephemeral: true);
+                        await RespondAsync(":x: You are already linked.", ephemeral: true);
                         return;
                     }
                 }
@@ -313,8 +313,8 @@ namespace ZomBot.Commands {
                                 await RoleHandler.JoinZombieTeam(Context.User, guild);
                         }
 
-                        Program.Log($"{player.name} has linked their discord.");
-                        await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
+                        Program.Info($"{player.name} has linked their discord.");
+                        await RespondAsync($":white_check_mark: You have successfully linked your account to {player.name}.", ephemeral: true);
                         return;
                     }
                 }
@@ -331,15 +331,15 @@ namespace ZomBot.Commands {
                         if (!ud.blacklisted)
                             await RoleHandler.JoinModTeam(Context.User, guild);
 
-                        Program.Log($"{player.name} has linked their discord.");
-                        await RespondAsync($":thumbsup: You have successfully linked your account to {player.name} :thumbsup:", ephemeral: true);
+                        Program.Info($"{player.name} has linked their discord.");
+                        await RespondAsync($":white_check_mark: You have successfully linked your account to {player.name}.", ephemeral: true);
                         return;
                     }
                 }
 
-                await RespondAsync($":x: Could not find {name}, check spelling and ensure you appear on the website :x:", ephemeral: true);
+                await RespondAsync($":x: Could not find {name}, check spelling and ensure you appear on the website.", ephemeral: true);
             } else
-                await RespondAsync(":x: How did we get here??? :x:", ephemeral: true);
+                await RespondAsync(":x: How did we get here???", ephemeral: true);
         }
 
         [ModalInteraction("oz_modal")]
@@ -353,7 +353,7 @@ namespace ZomBot.Commands {
             var user = Accounts.GetUser(Context.User, Context.Guild);
 
             if (user?.ozApp.applied ?? false) {
-                await RespondAsync(":x: You have already submitted an application :x:");
+                await RespondAsync(":x: You have already submitted an application.");
                 return;
 			}
 
@@ -381,7 +381,7 @@ namespace ZomBot.Commands {
                 await mic.SendMessageAsync(embed: eb.Build());
             
             Accounts.SaveAccounts();
-            await RespondAsync($":thumbsup: Application submitted. Remember that if you are chosen as an OZ, you are expected to commit heavily to playing until a at least a few tags are made. :thumbsup:", ephemeral: true);
+            await RespondAsync($":white_check_mark: Application submitted. **Remember that if you are chosen as an OZ, you are expected to commit heavily to playing until a at least a few tags are made.**", ephemeral: true);
         }
     }
 

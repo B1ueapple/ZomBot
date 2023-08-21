@@ -375,18 +375,48 @@ namespace ZomBot {
 				Log($"Updated {updatedPlayers}/{playerDataList.total + modDataList.players.Count} people.");
 		}
 
-		private Task Log(LogMessage msg)
-		{
+		private Task Log(LogMessage msg) {
 			if (msg.Exception is GatewayReconnectException)
 				Log("Reconnect");
 			else
-				Console.WriteLine(msg);
-
+				switch(msg.Severity) {
+					case LogSeverity.Info:
+						Info(msg.Message);
+						break;
+					case LogSeverity.Warning:
+						Warning(msg.Message);
+						break;
+					case LogSeverity.Error:
+						Error(msg.Message);
+						break;
+					case LogSeverity.Critical:
+						Critical(msg.Message);
+						break;
+					default:
+						Log("[???] " + msg.Message);
+						break;
+				}
 			return Task.CompletedTask;
 		}
 
-		public static void Log(string msg) {
+		private static void Log(string msg) {
 			Console.WriteLine($"[{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}] {msg}");
+		}
+
+		public static void Info(string msg) {
+			Log("[Info] " + msg);
+		}
+
+		public static void Warning(string msg) {
+			Log("[Warning] " + msg);
+		}
+
+		public static void Error(string msg) {
+			Log("[Error] " + msg);
+		}
+
+		public static void Critical(string msg) {
+			Log("[Critical] " + msg);
 		}
 	}
 

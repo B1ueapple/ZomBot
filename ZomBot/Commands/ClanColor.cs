@@ -19,13 +19,14 @@ namespace ZomBot.Commands {
             Clan clan = result.FirstOrDefault();
 
             if (clan.clanName == "" || clan.clanName == null)
-                await RespondAsync(":x: You're not in a clan :x:", ephemeral: true);
+                await RespondAsync($":x: You're not in a clan. Vist {Config.bot.hvzwebsite}/profile to join one.", ephemeral: true);
 
             if (Context.Guild is SocketGuild socketGuild) {
                 await socketGuild.GetRole(clan.roleID).ModifyAsync(x => x.Color = new Discord.Color(r, g, b));
-                await RespondAsync(":thumbsup: You have updated your clan's color :thumbsup:", ephemeral: true);
+                Program.Info($"{Context.User.Username} updated {clan.clanName}'s color to ({r}, {g}, {b}).");
+                await RespondAsync(":white_check_mark: You have updated your clan's color.", ephemeral: true);
             } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+                await RespondAsync(":x: This command can't be used here.", ephemeral: true);
         }
     }
 }

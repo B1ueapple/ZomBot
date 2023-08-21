@@ -56,15 +56,12 @@ namespace ZomBot.Resources {
 							string keyword = current.Substring(current.IndexOf("[[") + 2, current.IndexOf("]]") - current.IndexOf("[[") - 2).ToLower();
 							index += current.IndexOf("]]") + 2;
 
-							if (File.Exists(Config.mapFolder + "/" + keyword + ".png")) {
+							if (File.Exists(Config.mapFolder + "/" + keyword + ".png"))
 								await context.Channel.SendFileAsync(Path.GetFullPath(Config.mapFolder + "/" + keyword + ".png"));
-							}
-						} else {
+						} else
 							break;
-						}
-					} else {
+					} else
 						break;
-					}
 				}
 
 				int argPos = 0;
@@ -74,11 +71,11 @@ namespace ZomBot.Resources {
 
 					if (!result.IsSuccess && result.Error != CommandError.UnknownCommand) {
 						Console.WriteLine(result.ErrorReason);
-						await context.Channel.SendMessageAsync($":x: {result.ErrorReason} :x:");
+						await context.Channel.SendMessageAsync($":x: {result.ErrorReason}.");
 					}
 				}
 			} else
-				await context.Channel.SendMessageAsync("I'm afraid of isolated spaces. (My owner is too lazy to fix crashes caused by using commands in DMs)");
+				await context.Channel.SendMessageAsync("I'm afraid of isolated spaces. (My owner is too lazy to fix crashes caused by using commands in DMs).");
 		}
 	}
 }

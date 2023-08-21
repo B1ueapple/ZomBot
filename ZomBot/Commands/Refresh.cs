@@ -10,7 +10,7 @@ namespace ZomBot.Commands {
         public async Task RefreshCommand() {
             Program.GetSiteData();
 
-            await RespondAsync(":thumbsup: Refreshed Website Data :thumbsup:", ephemeral: true);
+            await RespondAsync(":white_check_mark: Refreshed Website Data.", ephemeral: true);
         }
     }
 }

@@ -23,20 +23,20 @@ namespace ZomBot.Commands {
                 if (register == RegisterParameter.Unregister) {
                     if (guildAccount.channels.Remove(channelID)) {
                         Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+                        await RespondAsync($":white_check_mark: #{Context.Channel.Name} is no longer a registed channel.", ephemeral: true);
                     } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
+                        await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel.", ephemeral: true);
 
                     return;
 				}
 
 				if (type == null) {
-					await RespondAsync(":x: Type required to register channel :x:", ephemeral: true);
+					await RespondAsync(":x: Type required to register channel.", ephemeral: true);
 					return;
                 }
 
 				if (type == ChannelDesignation.LOG) {
-					await RespondAsync(":x: LOG is reserved for internal use :x:", ephemeral: true);
+					await RespondAsync(":x: LOG is reserved for internal use.", ephemeral: true);
                     return;
 				}
 
@@ -45,19 +45,21 @@ namespace ZomBot.Commands {
 					if (guildAccount.channels.AddUnique(channelID, typeNotNull)) {
 						Accounts.SaveAccounts();
 						RoleHandler.UpdateChannel(channelID, guild);
-						await RespondAsync($":thumbsup: Registered #{Context.Channel.Name} as the {typeNotNull} channel :thumbsup:", ephemeral: true);
-					} else
-						await RespondAsync($":question: #{Context.Channel.Name} is already registered as the {typeNotNull} channel :question:", ephemeral: true);
+						await RespondAsync($":white_check_mark: Registered #{Context.Channel.Name} as the {typeNotNull} channel.", ephemeral: true);
+                        Program.Info($"Registered #{Context.Channel.Name} as the {typeNotNull} channel.");
+                    } else
+						await RespondAsync($":question: #{Context.Channel.Name} is already registered as the {typeNotNull} channel.", ephemeral: true);
 				} else {
 					if (guildAccount.channels.Add(channelID, typeNotNull)) {
 						Accounts.SaveAccounts();
 						RoleHandler.UpdateChannel(channelID, guild);
-						await RespondAsync($":thumbsup: Registered #{Context.Channel.Name} as a {typeNotNull} channel :thumbsup:", ephemeral: true);
+						await RespondAsync($":white_check_mark: Registered #{Context.Channel.Name} as a {typeNotNull} channel.", ephemeral: true);
+						Program.Info($"Registered #{Context.Channel.Name} as the {typeNotNull} channel.");
 					} else
-						await RespondAsync($":question: #{Context.Channel.Name}  is already registered as a {typeNotNull} channel :question:", ephemeral: true);
+						await RespondAsync($":question: #{Context.Channel.Name}  is already registered as a {typeNotNull} channel.", ephemeral: true);
 				}
             } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+                await RespondAsync(":x: This command can't be used here.", ephemeral: true);
 		}
 
         private bool IsUnique(ChannelDesignation type) {

@@ -14,7 +14,7 @@ namespace ZomBot.Commands {
             if (account.playerData.name != null)
                 await RespondAsync(account.playerData.name, ephemeral: true);
             else 
-                 await RespondAsync(":x: That user is not linked :x:", ephemeral: true);
+                 await RespondAsync(":x: That user is not linked.", ephemeral: true);
         }
 
         [SlashCommand("find", "Find a player's discord by their hvz name.")]
@@ -32,7 +32,7 @@ namespace ZomBot.Commands {
                 }
             }
 
-            await RespondAsync(":x: That player is not linked :x:", ephemeral: true);
+            await RespondAsync(":x: That player is not linked.", ephemeral: true);
         }
     }
 }

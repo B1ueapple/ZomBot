@@ -14,7 +14,8 @@ namespace ZomBot.Commands {
             account.AddWarning(Context.User, reason);
             Accounts.SaveAccounts();
 
-            await RespondAsync($"Added warning for {user.Username}.", ephemeral: true);
+            Program.Info($"{Context.User.Username} warned {user.Username}");
+            await RespondAsync($":white_check_mark: Added warning for {user.Username}.", ephemeral: true);
         }
 
         [UserCommand("Warnings")]

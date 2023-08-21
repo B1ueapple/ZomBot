@@ -29,9 +29,9 @@ namespace ZomBot.Resources {
 
 
                 if (!result.IsSuccess)
-                    await interaction.RespondAsync($":x: {result.ErrorReason} :x:", ephemeral: true);
+                    await interaction.RespondAsync($":x: {result.ErrorReason}.", ephemeral: true);
             } catch (Exception e) {
-                await interaction.RespondAsync($":x: {e.Message} :x:", ephemeral: true);
+                await interaction.RespondAsync($":x: {e.Message}.", ephemeral: true);
             }
 		}
         /*
