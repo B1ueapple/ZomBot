@@ -7,15 +7,20 @@ using ZomBot.Resources;
 
 namespace ZomBot.Commands {
     public class Channels : InteractionModuleBase {
-        [SlashCommand("mic", "Set the current channel as a mod important channel.")]
+        public enum RegisterParameter {
+            Register,
+            Unregister
+        }
+
+        [SlashCommand("channels", "Register or unregister the current channel.")]
         [RequireContext(ContextType.Guild)]
         [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetModImportantChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
+        public async Task RegisterChannelCommand([Summary("Mode", "Choose to register or unregister this channel.")] RegisterParameter register, [Summary("Type", "What type of channel to register as.")] ChannelDesignation? type = null) {
             if (Context.Guild is SocketGuild guild) {
                 var guildAccount = Accounts.GetGuild(guild);
                 ulong channelID = Context.Channel.Id;
 
-                if (reset) {
+                if (register == RegisterParameter.Unregister) {
                     if (guildAccount.channels.Remove(channelID)) {
                         Accounts.SaveAccounts();
                         await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
@@ -23,216 +28,53 @@ namespace ZomBot.Commands {
                         await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
                     return;
+				}
+
+				if (type == null) {
+					await RespondAsync(":x: Type required to register channel :x:", ephemeral: true);
+					return;
                 }
 
-                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.MODIMPORTANT)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the mod important channel :thumbsup:", ephemeral: true);
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already the mod important channel :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-
-        [SlashCommand("zc", "Set the current channel as a zombie text channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetZombieChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
-						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
-					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
-				}
-
-                if (guildAccount.channels.Add(channelID, ChannelDesignation.ZOMBIE)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Added #{Context.Channel.Name} to zombie channels :thumbsup:", ephemeral: true);
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already in zombie channels :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-
-        [SlashCommand("hc", "Set the current channel as a human text channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetHumanChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
-						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
-					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
-				}
-
-                if (guildAccount.channels.Add(channelID, ChannelDesignation.HUMAN)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Added #{Context.Channel.Name} to human channels :thumbsup:", ephemeral: true);
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already in human channels :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-        
-        [SlashCommand("mc", "Set the current channel as a mod text channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetModChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
-						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
-					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
-				}
-
-                if (guildAccount.channels.Add(channelID, ChannelDesignation.MOD)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Added #{Context.Channel.Name} to mod channels :thumbsup:", ephemeral: true);
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already in mod channels :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-        
-        [SlashCommand("gac", "Set the current channel as the general announcement channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetGeneralAnnouncementChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
-						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
-					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
-				}
-
-                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.SHAREDANNOUNCEMENT)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the general announcement channel :thumbsup:", ephemeral: true);
+				if (type == ChannelDesignation.LOG) {
+					await RespondAsync(":x: LOG is reserved for internal use :x:", ephemeral: true);
                     return;
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already the general announcement channel :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-        
-        [SlashCommand("zac", "Set the current channel as the zombie announcement channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetZombieAnnouncementChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
-						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
-					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
 				}
 
-                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.ZOMBIEANNOUNCEMENT)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the zombie announcement channel :thumbsup:", ephemeral: true);
-                    return;
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already the zombie announcement channel :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-        
-        [SlashCommand("hac", "Set the current channel as the human announcement channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetHumanAnnouncementChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
+                ChannelDesignation typeNotNull = (ChannelDesignation)type;
+				if (IsUnique(typeNotNull)) {
+					if (guildAccount.channels.AddUnique(channelID, typeNotNull)) {
 						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+						RoleHandler.UpdateChannel(channelID, guild);
+						await RespondAsync($":thumbsup: Registered #{Context.Channel.Name} as the {typeNotNull} channel :thumbsup:", ephemeral: true);
 					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
-				}
-
-                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.HUMANANNOUNCEMENT)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the human announcement channel :thumbsup:", ephemeral: true);
-                    return;
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already the human announcement channel :question:", ephemeral: true);
-            } else
-                await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
-        }
-        
-        [SlashCommand("tc", "Set the current channel as the tag channel.")]
-        [RequireContext(ContextType.Guild)]
-        [DefaultMemberPermissions(GuildPermission.ManageChannels), RequireBotPermission(GuildPermission.ManageChannels)]
-        public async Task SetTagChannelCommand([Summary("Remove", "Set to true to remove.")] bool reset = false) {
-            if (Context.Guild is SocketGuild guild) {
-                var guildAccount = Accounts.GetGuild(guild);
-                ulong channelID = Context.Channel.Id;
-
-                if (reset) {
-					if (guildAccount.channels.Remove(channelID)) {
+						await RespondAsync($":question: #{Context.Channel.Name} is already registered as the {typeNotNull} channel :question:", ephemeral: true);
+				} else {
+					if (guildAccount.channels.Add(channelID, typeNotNull)) {
 						Accounts.SaveAccounts();
-						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+						RoleHandler.UpdateChannel(channelID, guild);
+						await RespondAsync($":thumbsup: Registered #{Context.Channel.Name} as a {typeNotNull} channel :thumbsup:", ephemeral: true);
 					} else
-						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
-
-					return;
+						await RespondAsync($":question: #{Context.Channel.Name}  is already registered as a {typeNotNull} channel :question:", ephemeral: true);
 				}
-
-                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.TAG)) {
-                    Accounts.SaveAccounts();
-                    RoleHandler.UpdateChannel(channelID, guild);
-                    await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the tag channel :thumbsup:", ephemeral: true);
-                    return;
-                } else
-                    await RespondAsync($":question: #{Context.Channel.Name} is already the tag channel :question:", ephemeral: true);
             } else
                 await RespondAsync(":x: This command can't be used here :x:", ephemeral: true);
+		}
+
+        private bool IsUnique(ChannelDesignation type) {
+            switch (type) {
+                case ChannelDesignation.MODIMPORTANT:
+                case ChannelDesignation.HUMANANNOUNCEMENT:
+                case ChannelDesignation.ZOMBIEANNOUNCEMENT:
+                case ChannelDesignation.SHAREDANNOUNCEMENT:
+                case ChannelDesignation.TAG:
+                    return true;
+                case ChannelDesignation.MOD:
+                case ChannelDesignation.HUMAN:
+                case ChannelDesignation.ZOMBIE:
+                    return false;
+                default:
+                    return true;
+            }
         }
     }
 }

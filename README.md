@@ -11,6 +11,7 @@ Discord bot for running an HVZ Discord server.
 
 ### Commands
 - `/blacklist {user} [true/false]` - Toggles whether or not Zombot will automagically update a specific user. **Requires 'Manage Roles' permission on Discord**
+- `/channels {mode} [type]` - Register the current channel as a specific game channel. **Requires 'Manage Channels' permission on Discord**
 - `/checklinked` - List all linked and unlinked players. **Requires 'Manage Roles' permission on Discord**
 - `/clancolor {r} {g} {b}` - Change the color of your clan role.
 - `/endgame` - End the game. (Doesn't affect the website) **Requires 'Manage Guild' permission on Discord**
@@ -23,7 +24,6 @@ Discord bot for running an HVZ Discord server.
 - `/unlink [other user]` - Unlink [your] discord from hvz. Does nothing if you aren't currently linked. **Requires 'Manage Roles' permission on Discord to unlink others**
 - `/warn {user} {reason}` - Warn a user. **Requires 'Kick Members' permission on Discord**
 - `/whois {user}` - Check a player's name.
-- `/zc`, `/hc`, `/mc`, `/gac`, `/zac`, `/hac` - Set the current channel as a zombie/human/mod/general announcement/zombie announcement/human announcement text channel respectively. **Requires 'Manage Channels' permission on Discord**
 
 ### Passive Functions
 - Automagically update a user's role to 'Human', 'Zombie', 'Mod', based on their team on the website.
