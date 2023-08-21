@@ -44,7 +44,7 @@ namespace ZomBot.Commands {
 				if (IsUnique(typeNotNull)) {
 					if (guildAccount.channels.AddUnique(channelID, typeNotNull)) {
 						Accounts.SaveAccounts();
-						RoleHandler.UpdateChannel(channelID, guild);
+						ChannelUtils.UpdateChannel(channelID, guild);
 						await RespondAsync($":white_check_mark: Registered #{Context.Channel.Name} as the {typeNotNull} channel.", ephemeral: true);
                         Program.Info($"Registered #{Context.Channel.Name} as the {typeNotNull} channel.");
                     } else
@@ -52,7 +52,7 @@ namespace ZomBot.Commands {
 				} else {
 					if (guildAccount.channels.Add(channelID, typeNotNull)) {
 						Accounts.SaveAccounts();
-						RoleHandler.UpdateChannel(channelID, guild);
+						ChannelUtils.UpdateChannel(channelID, guild);
 						await RespondAsync($":white_check_mark: Registered #{Context.Channel.Name} as a {typeNotNull} channel.", ephemeral: true);
 						Program.Info($"Registered #{Context.Channel.Name} as the {typeNotNull} channel.");
 					} else

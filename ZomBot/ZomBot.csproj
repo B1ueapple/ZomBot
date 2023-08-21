@@ -229,13 +229,14 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\Accounts.cs" />
+    <Compile Include="Resources\ChannelUtils.cs" />
     <Compile Include="Resources\CommandHandler.cs" />
     <Compile Include="Data\DataStorage.cs" />
     <Compile Include="Data\GuildData.cs" />
     <Compile Include="Data\UserData.cs" />
     <Compile Include="Resources\Formatting.cs" />
     <Compile Include="Resources\InteractionHandler.cs" />
-    <Compile Include="Resources\RoleHandler.cs" />
+    <Compile Include="Resources\RoleUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

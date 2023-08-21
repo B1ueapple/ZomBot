@@ -165,11 +165,11 @@ namespace ZomBot {
 			await _interactions.SetupAsync();
 		}
 
-		public static PlayerDataList getPDL() {
+		public static PlayerDataList GetPDL() {
 			return playerDataList;
 		}
 
-		public static ModDataList getMDL() {
+		public static ModDataList GetMDL() {
 			return modDataList;
 		}
 
@@ -262,12 +262,12 @@ namespace ZomBot {
 										u.playerData = player;
 
 										if (u.playerData.team == "human") {
-											await RoleHandler.JoinHumanTeam(user, guild);
+											await RoleUtils.JoinHumanTeam(user, guild);
 
 											if ((u.playerData?.clan ?? "") != "")
-												await RoleHandler.JoinClan(user, guild, u.playerData.clan);
+												await RoleUtils.JoinClan(user, guild, u.playerData.clan);
 											else
-												await RoleHandler.LeaveClan(user, guild);
+												await RoleUtils.LeaveClan(user, guild);
 										} else if (u.playerData.team == "zombie") {
 											numZombies++;
 											if (u.specialPlayerData.cured) {
@@ -282,8 +282,8 @@ namespace ZomBot {
 												updated = true;
 											}
 
-											await RoleHandler.JoinZombieTeam(user, guild, isMVZ);
-											await RoleHandler.LeaveClan(user, guild); // zombies don't have affiliations with anyone but other zombies
+											await RoleUtils.JoinZombieTeam(user, guild, isMVZ);
+											await RoleUtils.LeaveClan(user, guild); // zombies don't have affiliations with anyone but other zombies
 										}
 
 										if (updated)
@@ -303,7 +303,7 @@ namespace ZomBot {
 
 										u.playerData = mod;
 										Accounts.SaveAccounts();
-										await RoleHandler.JoinModTeam(user, guild);
+										await RoleUtils.JoinModTeam(user, guild);
 										break; // player updated, next player
 									}
 								}

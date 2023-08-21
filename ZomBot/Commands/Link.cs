@@ -27,7 +27,7 @@ namespace ZomBot.Commands {
                 }
 
                 { // player list check
-                    var result = from a in Program.getPDL().players
+                    var result = from a in Program.GetPDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
@@ -38,12 +38,12 @@ namespace ZomBot.Commands {
 
                         if (!ud.blacklisted) {
                             if (player.team == "human") {
-                                await RoleHandler.JoinHumanTeam(Context.User, guild);
+                                await RoleUtils.JoinHumanTeam(Context.User, guild);
 
                                 if (ud.playerData.clan != null && ud.playerData.clan != "")
-                                    await RoleHandler.JoinClan(Context.User, guild, ud.playerData.clan);
+                                    await RoleUtils.JoinClan(Context.User, guild, ud.playerData.clan);
                             } else if (player.team == "zombie")
-                                await RoleHandler.JoinZombieTeam(Context.User, guild);
+                                await RoleUtils.JoinZombieTeam(Context.User, guild);
                         }
 
                         Program.Info($"{player.name} has linked their discord.");
@@ -52,7 +52,7 @@ namespace ZomBot.Commands {
                     }
                 }
                 { // mod list check
-                    var result = from a in Program.getMDL().players
+                    var result = from a in Program.GetMDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
@@ -62,7 +62,7 @@ namespace ZomBot.Commands {
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted)
-                            await RoleHandler.JoinModTeam(Context.User, guild);
+                            await RoleUtils.JoinModTeam(Context.User, guild);
 
                         Program.Info($"{player.name} has linked their discord.");
                         await RespondAsync($":white_check_mark: You have successfully linked your account to {player.name}.", ephemeral: true);
@@ -99,7 +99,7 @@ namespace ZomBot.Commands {
 
                     ud.playerData = p;
 
-                    await RoleHandler.LeaveTeams(user ?? Context.User, guild);
+                    await RoleUtils.LeaveTeams(user ?? Context.User, guild);
                     await RespondAsync($":white_check_mark: You have successfully unlinked {(user != null ? (user.Username + "'s") : "your")} account.", ephemeral: true);
                     return;
                 }
@@ -128,7 +128,7 @@ namespace ZomBot.Commands {
                     }
                 }
                 { // player list check
-                    var result = from a in Program.getPDL().players
+                    var result = from a in Program.GetPDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
@@ -139,9 +139,9 @@ namespace ZomBot.Commands {
 
                         if (!ud.blacklisted) {
                             if (player.team == "human")
-                                await RoleHandler.JoinHumanTeam(user, guild);
+                                await RoleUtils.JoinHumanTeam(user, guild);
                             else if (player.team == "zombie")
-                                await RoleHandler.JoinZombieTeam(user, guild);
+                                await RoleUtils.JoinZombieTeam(user, guild);
                         }
 
                         Program.Info($"{player.name} has been linked by {Context.User.Username}.");
@@ -150,7 +150,7 @@ namespace ZomBot.Commands {
                     }
                 }
                 { // mod list check
-                    var result = from a in Program.getMDL().players
+                    var result = from a in Program.GetMDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
@@ -160,7 +160,7 @@ namespace ZomBot.Commands {
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted)
-                            await RoleHandler.JoinModTeam(user, guild);
+                            await RoleUtils.JoinModTeam(user, guild);
 
                         Program.Info($"{player.name} has been linked by {Context.User.Username}.");
                         await RespondAsync($":white_check_mark: You have successfully linked their account to {player.name}.", ephemeral: true);
@@ -194,7 +194,7 @@ namespace ZomBot.Commands {
                     list += "\n";
                 }
 
-                foreach (PlayerData data in Program.getPDL().players) {
+                foreach (PlayerData data in Program.GetPDL().players) {
                     if (list.Contains("+ " + data.name))
                         continue;
 
@@ -294,7 +294,7 @@ namespace ZomBot.Commands {
                 }
 
                 { // player list check
-                    var result = from a in Program.getPDL().players
+                    var result = from a in Program.GetPDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
@@ -305,12 +305,12 @@ namespace ZomBot.Commands {
 
                         if (!ud.blacklisted) {
                             if (player.team == "human") {
-                                await RoleHandler.JoinHumanTeam(Context.User, guild);
+                                await RoleUtils.JoinHumanTeam(Context.User, guild);
 
                                 if (ud.playerData.clan != null && ud.playerData.clan != "")
-                                    await RoleHandler.JoinClan(Context.User, guild, ud.playerData.clan);
+                                    await RoleUtils.JoinClan(Context.User, guild, ud.playerData.clan);
                             } else if (player.team == "zombie")
-                                await RoleHandler.JoinZombieTeam(Context.User, guild);
+                                await RoleUtils.JoinZombieTeam(Context.User, guild);
                         }
 
                         Program.Info($"{player.name} has linked their discord.");
@@ -319,7 +319,7 @@ namespace ZomBot.Commands {
                     }
                 }
                 { // mod list check
-                    var result = from a in Program.getMDL().players
+                    var result = from a in Program.GetMDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
@@ -329,7 +329,7 @@ namespace ZomBot.Commands {
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted)
-                            await RoleHandler.JoinModTeam(Context.User, guild);
+                            await RoleUtils.JoinModTeam(Context.User, guild);
 
                         Program.Info($"{player.name} has linked their discord.");
                         await RespondAsync($":white_check_mark: You have successfully linked your account to {player.name}.", ephemeral: true);

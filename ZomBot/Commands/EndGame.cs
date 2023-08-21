@@ -21,7 +21,7 @@ namespace ZomBot.Commands {
             if (Context.Guild is SocketGuild g) {
                 Program.Info($"{Context.User.Username} ended the game.");
                 await RespondAsync(":white_check_mark: The server is being updated to reflect the game ending.", ephemeral: true); // respond before execution because execution takes too long...
-                await RoleHandler.EndGame(g);
+                await ChannelUtils.EndGame(g);
             } else
                 await RespondAsync(":x: This command can't be used here.", ephemeral: true);
         }
