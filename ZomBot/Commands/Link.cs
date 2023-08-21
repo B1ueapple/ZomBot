@@ -279,7 +279,7 @@ namespace ZomBot.Commands {
             string name = menu.Name.Trim();
 
             if (!Config.bot.apionline) {
-                await RespondAsync(":x: Linking is currently disabled :x:", ephemeral: true);
+                await RespondAsync(":x: Linking is currently unavailable :x:", ephemeral: true);
                 return;
             }
 
@@ -365,7 +365,7 @@ namespace ZomBot.Commands {
                 why = why
             };
 
-            var mic = await Context.Guild.GetTextChannelAsync(guild.channels.modImportantChannel);
+            var mic = await Context.Guild.GetTextChannelAsync(guild.channels.GetFirstChannelByType(ChannelDesignation.MODIMPORTANT) ?? 0);
 
             var eb = new EmbedBuilder()
                 .WithCurrentTimestamp()

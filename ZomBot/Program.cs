@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using ZomBot.Data;
@@ -85,17 +86,17 @@ namespace ZomBot {
 
 				if (channel.Value is SocketGuildChannel c) {
 					var guildAccount = Accounts.GetGuild(c.Guild);
-					var logChannel = c.Guild.GetTextChannel(guildAccount.channels.logChannel);
+					SocketTextChannel logTextChannel = c.Guild.GetTextChannel(guildAccount.channels.GetFirstChannelByType(ChannelDesignation.LOG) ?? 0);
 
-					if (logChannel == null) {
+					if (logTextChannel == null) {
 						List<Overwrite> overwrites = new List<Overwrite> {
 							new Overwrite(c.Guild.EveryoneRole.Id, PermissionTarget.Role, new OverwritePermissions(viewChannel: PermValue.Deny))
 						};
 
-						ITextChannel ch = await c.Guild.CreateTextChannelAsync("message-log", x => x.PermissionOverwrites = overwrites);
-						guildAccount.channels.logChannel = ch.Id;
+						RestTextChannel textChannel = await c.Guild.CreateTextChannelAsync("message-log", x => x.PermissionOverwrites = overwrites);
+						guildAccount.channels.AddUnique(textChannel.Id, ChannelDesignation.LOG);
 						Accounts.SaveAccounts();
-						logChannel = (SocketTextChannel)ch;
+						logTextChannel = c.Guild.GetTextChannel(textChannel.Id);
 					}
 
 					var chatLog = ChatManager.GetChatLog(message.Value.Author);
@@ -109,7 +110,7 @@ namespace ZomBot {
 							 .AddField($"Deleted from #{c.Name}", (message.Value.CleanContent ?? "") == "" ? "no text" : message.Value.CleanContent)
 							 .WithCurrentTimestamp();
 
-						await logChannel.SendMessageAsync(embed: embed.Build());
+						await logTextChannel.SendMessageAsync(embed: embed.Build());
 					} catch {
 						Log("Couldn't log MessageDelete");
 					}
@@ -125,16 +126,17 @@ namespace ZomBot {
 				if (before.Value.CleanContent != after.CleanContent) {
 					if (channel is SocketTextChannel c) {
 						var guildAccount = Accounts.GetGuild(c.Guild);
-						var logChannel = c.Guild.GetTextChannel(guildAccount.channels.logChannel);
-						if (logChannel == null) {
+						SocketTextChannel logTextChannel = c.Guild.GetTextChannel(guildAccount.channels.GetFirstChannelByType(ChannelDesignation.LOG) ?? 0);
+
+						if (logTextChannel == null) {
 							List<Overwrite> overwrites = new List<Overwrite> {
 								new Overwrite(c.Guild.EveryoneRole.Id, PermissionTarget.Role, new OverwritePermissions(viewChannel: PermValue.Deny))
 							};
 
-							ITextChannel ch = await c.Guild.CreateTextChannelAsync("message-log", x => x.PermissionOverwrites = overwrites);
-							guildAccount.channels.logChannel = ch.Id;
+							RestTextChannel textChannel = await c.Guild.CreateTextChannelAsync("message-log", x => x.PermissionOverwrites = overwrites);
+							guildAccount.channels.AddUnique(textChannel.Id, ChannelDesignation.LOG);
 							Accounts.SaveAccounts();
-							logChannel = (SocketTextChannel)ch;
+							logTextChannel = c.Guild.GetTextChannel(textChannel.Id);
 						}
 
 						var chatLog = ChatManager.GetChatLog(before.Value.Author);
@@ -150,7 +152,7 @@ namespace ZomBot {
 									.AddField("Changed to", (after.CleanContent ?? "") == "" ? "no text" : after.CleanContent)
 									.WithCurrentTimestamp();
 
-							await logChannel.SendMessageAsync(embed: embed.Build());
+							await logTextChannel.SendMessageAsync(embed: embed.Build());
 						} catch {
 							Log("Couldn't log MessageUpdated");
 						}
@@ -235,7 +237,7 @@ namespace ZomBot {
 												break; // nothing changed, continue to next user
 
 										bool updated = false;
-										var tagChannel = guild.GetTextChannel(g.channels.tagChannel);
+										var tagChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.TAG) ?? 0);
 
 										if (u.playerData.team == "zombie" && player.team == "human") { // changed from zombie to human
 											u.specialPlayerData.cured = true;
@@ -328,17 +330,29 @@ namespace ZomBot {
 							string b = Resources.Formatting.HtmlToPlainText(m.body).Replace("  ", " ");
 							
 							if (m.team == "human") {
-								await guild.GetTextChannel(g.channels.humanAnnouncementChannel).SendMessageAsync($"**{m.title}**");
-								await guild.GetTextChannel(g.channels.humanAnnouncementChannel).SendMessageAsync(b);
-								await guild.GetTextChannel(g.channels.humanAnnouncementChannel).SendMessageAsync(guild.GetRole(g.roleIDs.human).Mention);
+								var humanAnnouncementChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.HUMANANNOUNCEMENT) ?? 0);
+
+								if (humanAnnouncementChannel != null) {
+									await humanAnnouncementChannel.SendMessageAsync($"**{m.title}**");
+									await humanAnnouncementChannel.SendMessageAsync(b);
+									await humanAnnouncementChannel.SendMessageAsync(guild.GetRole(g.roleIDs.human).Mention);
+								}
 							} else if (m.team == "zombie") {
-								await guild.GetTextChannel(g.channels.zombieAnnouncementChannel).SendMessageAsync($"**{m.title}**");
-								await guild.GetTextChannel(g.channels.zombieAnnouncementChannel).SendMessageAsync(b);
-								await guild.GetTextChannel(g.channels.zombieAnnouncementChannel).SendMessageAsync(guild.GetRole(g.roleIDs.zombie).Mention);
+								var zombieAnnouncementChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.ZOMBIEANNOUNCEMENT) ?? 0);
+
+								if (zombieAnnouncementChannel != null) {
+									await zombieAnnouncementChannel.SendMessageAsync($"**{m.title}**");
+									await zombieAnnouncementChannel.SendMessageAsync(b);
+									await zombieAnnouncementChannel.SendMessageAsync(guild.GetRole(g.roleIDs.zombie).Mention);
+								}
 							} else if (m.team == "all") {
-								await guild.GetTextChannel(g.channels.generalAnnouncementChannel).SendMessageAsync($"**{m.title}**");
-								await guild.GetTextChannel(g.channels.generalAnnouncementChannel).SendMessageAsync(b);
-								await guild.GetTextChannel(g.channels.generalAnnouncementChannel).SendMessageAsync(guild.GetRole(g.roleIDs.player).Mention);
+								var sharedAnnouncementChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.SHAREDANNOUNCEMENT) ?? 0);
+
+								if (sharedAnnouncementChannel != null) {
+									await sharedAnnouncementChannel.SendMessageAsync($"**{m.title}**");
+									await sharedAnnouncementChannel.SendMessageAsync(b);
+									await sharedAnnouncementChannel.SendMessageAsync(guild.GetRole(g.roleIDs.player).Mention);
+								}
 							}
 
 							MissionData d = new MissionData() {

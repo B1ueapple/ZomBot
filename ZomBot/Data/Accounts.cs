@@ -103,11 +103,7 @@ namespace ZomBot.Data {
             var newAccount = new GuildData() {
                 id = id,
                 userData = new List<UserData>(),
-                channels = new ChannelList() {
-                    humanChannels = new List<ulong>(),
-                    zombieChannels = new List<ulong>(),
-                    modChannels = new List<ulong>()
-                },
+                channels = new ChannelList(),
                 roleIDs = new RoleList(),
                 missions = new MissionList() {
                     missions = new List<MissionData>()

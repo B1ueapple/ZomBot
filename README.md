@@ -29,7 +29,7 @@ Discord bot for running an HVZ Discord server.
 - Automagically update a user's role to 'Human', 'Zombie', 'Mod', based on their team on the website.
 - Add additional roles for special statuses such as 'Cured'.
 - Push missions posted on the website directly to Discord and ping the related teams.
-- Allow zombies to compete for the 'MVZ' role which is given to the zombie(s) with the most tags.
-- Lets humans squad together on Discord by creating/joining 'clans' on the website.
+- Allows zombies to compete for the 'MVZ' role which is given to the zombie(s) with the most tags.
+- Allows humans to squad together on Discord by creating/joining 'clans' on the website.
 - Logs changed/deleted messages in the event that an unsavory individual desecrates the server and tries to cover it up.
 - Ending the game will clean up game roles and allow players to provide feedback in an automagically created group of channels and archive game channels. Players are given veteran roles to show their participance in the game.

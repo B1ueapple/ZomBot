@@ -223,6 +223,7 @@
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Warn.cs" />
     <Compile Include="Commands\WhoIs.cs" />
+    <Compile Include="Data\ChannelList.cs" />
     <Compile Include="Data\ChatLog.cs" />
     <Compile Include="Data\Config.cs" />
     <Compile Include="Program.cs" />

@@ -16,35 +16,19 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.modImportantChannel == channelID) {
-                        guildAccount.channels.modImportantChannel = 0;
+                    if (guildAccount.channels.Remove(channelID)) {
                         Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer the mod important channel :thumbsup:", ephemeral: true);
+                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
                     } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not the mod important channel :x:", ephemeral: true);
+                        await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
                     return;
                 }
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-                guildAccount.channels.zombieChannels.Remove(channelID);
-
-                if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-
-                if (guildAccount.channels.modImportantChannel != channelID) {
-                    guildAccount.channels.modImportantChannel = channelID;
+                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.MODIMPORTANT)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the mod important channel :thumbsup:", ephemeral: true);
-                    return;
                 } else
                     await RespondAsync($":question: #{Context.Channel.Name} is already the mod important channel :question:", ephemeral: true);
             } else
@@ -60,35 +44,19 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.zombieChannels.Remove(channelID)) {
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: Removed #{Context.Channel.Name} from zombie channels :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not in zombie channels :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-
-                if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-                else if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (!guildAccount.channels.zombieChannels.Contains(channelID)) {
-                    guildAccount.channels.zombieChannels.Add(channelID);
+                if (guildAccount.channels.Add(channelID, ChannelDesignation.ZOMBIE)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Added #{Context.Channel.Name} to zombie channels :thumbsup:", ephemeral: true);
-                    return;
                 } else
                     await RespondAsync($":question: #{Context.Channel.Name} is already in zombie channels :question:", ephemeral: true);
             } else
@@ -104,35 +72,19 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.humanChannels.Remove(channelID)) {
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: Removed #{Context.Channel.Name} from human channels :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not in human channels :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.zombieChannels.Remove(channelID);
-
-                if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-                else if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (!guildAccount.channels.humanChannels.Contains(channelID)) {
-                    guildAccount.channels.humanChannels.Add(channelID);
+                if (guildAccount.channels.Add(channelID, ChannelDesignation.HUMAN)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Added #{Context.Channel.Name} to human channels :thumbsup:", ephemeral: true);
-                    return;
                 } else
                     await RespondAsync($":question: #{Context.Channel.Name} is already in human channels :question:", ephemeral: true);
             } else
@@ -148,35 +100,19 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.modChannels.Remove(channelID)) {
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: Removed #{Context.Channel.Name} from mod channels :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not in mod channels :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.zombieChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-
-                if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-                else if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (!guildAccount.channels.modChannels.Contains(channelID)) {
-                    guildAccount.channels.modChannels.Add(channelID);
+                if (guildAccount.channels.Add(channelID, ChannelDesignation.MOD)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Added #{Context.Channel.Name} to mod channels :thumbsup:", ephemeral: true);
-                    return;
                 } else
                     await RespondAsync($":question: #{Context.Channel.Name} is already in mod channels :question:", ephemeral: true);
             } else
@@ -192,31 +128,16 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.generalAnnouncementChannel == channelID) {
-                        guildAccount.channels.generalAnnouncementChannel = 0;
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer the general announcement channel :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not the general announcement channel :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-                guildAccount.channels.zombieChannels.Remove(channelID);
-
-                if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (guildAccount.channels.generalAnnouncementChannel != channelID) {
-                    guildAccount.channels.generalAnnouncementChannel = channelID;
+                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.SHAREDANNOUNCEMENT)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the general announcement channel :thumbsup:", ephemeral: true);
@@ -236,31 +157,16 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.zombieAnnouncementChannel == channelID) {
-                        guildAccount.channels.zombieAnnouncementChannel = 0;
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer the zombie announcement channel :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not the zombie announcement channel :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-                guildAccount.channels.zombieChannels.Remove(channelID);
-
-                if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (guildAccount.channels.zombieAnnouncementChannel != channelID) {
-                    guildAccount.channels.zombieAnnouncementChannel = channelID;
+                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.ZOMBIEANNOUNCEMENT)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the zombie announcement channel :thumbsup:", ephemeral: true);
@@ -280,31 +186,16 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.humanAnnouncementChannel == channelID) {
-                        guildAccount.channels.humanAnnouncementChannel = 0;
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer the human announcement channel :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not the human announcement channel :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-                guildAccount.channels.zombieChannels.Remove(channelID);
-
-                if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.tagChannel == channelID)
-                    guildAccount.channels.tagChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (guildAccount.channels.humanAnnouncementChannel != channelID) {
-                    guildAccount.channels.humanAnnouncementChannel = channelID;
+                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.HUMANANNOUNCEMENT)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the human announcement channel :thumbsup:", ephemeral: true);
@@ -324,31 +215,16 @@ namespace ZomBot.Commands {
                 ulong channelID = Context.Channel.Id;
 
                 if (reset) {
-                    if (guildAccount.channels.tagChannel == channelID) {
-                        guildAccount.channels.tagChannel = 0;
-                        Accounts.SaveAccounts();
-                        await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer the tag channel :thumbsup:", ephemeral: true);
-                    } else
-                        await RespondAsync($":x: #{Context.Channel.Name} is not the tag channel :x:", ephemeral: true);
+					if (guildAccount.channels.Remove(channelID)) {
+						Accounts.SaveAccounts();
+						await RespondAsync($":thumbsup: #{Context.Channel.Name} is no longer a registed channel :thumbsup:", ephemeral: true);
+					} else
+						await RespondAsync($":x: #{Context.Channel.Name} is not a registered channel :x:", ephemeral: true);
 
-                    return;
-                }
+					return;
+				}
 
-                guildAccount.channels.modChannels.Remove(channelID);
-                guildAccount.channels.humanChannels.Remove(channelID);
-                guildAccount.channels.zombieChannels.Remove(channelID);
-
-                if (guildAccount.channels.generalAnnouncementChannel == channelID)
-                    guildAccount.channels.generalAnnouncementChannel = 0;
-                else if (guildAccount.channels.humanAnnouncementChannel == channelID)
-                    guildAccount.channels.humanAnnouncementChannel = 0;
-                else if (guildAccount.channels.zombieAnnouncementChannel == channelID)
-                    guildAccount.channels.zombieAnnouncementChannel = 0;
-                else if (guildAccount.channels.modImportantChannel == channelID)
-                    guildAccount.channels.modImportantChannel = 0;
-
-                if (guildAccount.channels.tagChannel != channelID) {
-                    guildAccount.channels.tagChannel = channelID;
+                if (guildAccount.channels.AddUnique(channelID, ChannelDesignation.TAG)) {
                     Accounts.SaveAccounts();
                     RoleHandler.UpdateChannel(channelID, guild);
                     await RespondAsync($":thumbsup: Set #{Context.Channel.Name} as the tag channel :thumbsup:", ephemeral: true);
