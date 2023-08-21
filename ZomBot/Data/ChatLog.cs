@@ -76,7 +76,7 @@ namespace ZomBot.Data {
 			var log = result.FirstOrDefault();
 
 			if (log == null)
-				Program.Log("Tried to edit a non-existent message");
+				Program.Error("Tried to edit a non-existent message.");
 			else
 				log.AddEdit(newContent);
 		}
@@ -89,7 +89,7 @@ namespace ZomBot.Data {
 			var log = result.FirstOrDefault();
 
 			if (log == null)
-				Program.Log("Tried to set deleted on non-existent message");
+				Program.Error("Tried to set deleted on non-existent message.");
 			else
 				log.SetDeleted();
 		}
