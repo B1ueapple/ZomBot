@@ -56,7 +56,7 @@ namespace ZomBot.Resources {
 							string keyword = current.Substring(current.IndexOf("[[") + 2, current.IndexOf("]]") - current.IndexOf("[[") - 2).ToLower();
 							index += current.IndexOf("]]") + 2;
 
-							if (File.Exists(Config.mapFolder + "/" + keyword + ".png"))
+							if (File.Exists(Config.mapFolder + "/" + keyword.Replace(" ", "").Replace(".", "").Replace("-", "").Replace("/", "").Replace("\\", "") + ".png"))
 								await context.Channel.SendFileAsync(Path.GetFullPath(Config.mapFolder + "/" + keyword + ".png"));
 						} else
 							break;
