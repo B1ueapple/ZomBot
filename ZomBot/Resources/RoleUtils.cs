@@ -219,9 +219,15 @@ namespace ZomBot.Resources {
 				}
 
 				if (userRoles.Contains(role)) {
-					if (c.clanName.Trim().ToLower() != clanName.Trim().ToLower()) {
+					if (c.clanName.Trim().ToLower() != clanName.ToLower()) {
 						Program.Info($"Removed {clanName.Trim()} role from {user.Username}.");
 						await userButInGuild.RemoveRoleAsync(role);
+
+						if (role.Members.Count() == 0) {
+							Program.Info($"Deleted role: {role.Name}.");
+							await role.DeleteAsync();
+							toRemove.Add(c);
+						}
 					}
 				} else {
 					if (c.clanName.Trim().ToLower() == clanName.Trim().ToLower()) {

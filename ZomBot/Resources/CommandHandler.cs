@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -48,6 +49,7 @@ namespace ZomBot.Resources {
 				}
 
 				int index = 0;
+				List<FileAttachment> files = new List<FileAttachment>();
 				while (index < content.Length) {
 					string current = content.Substring(index);
 
@@ -56,13 +58,16 @@ namespace ZomBot.Resources {
 							string keyword = current.Substring(current.IndexOf("[[") + 2, current.IndexOf("]]") - current.IndexOf("[[") - 2).ToLower();
 							index += current.IndexOf("]]") + 2;
 
-							if (File.Exists(Config.mapFolder + "/" + keyword.Replace(" ", "").Replace(".", "").Replace("-", "").Replace("/", "").Replace("\\", "") + ".png"))
-								await context.Channel.SendFileAsync(Path.GetFullPath(Config.mapFolder + "/" + keyword + ".png"));
+							if (File.Exists(Config.mapFolder + "/" + keyword.Replace(" ", "").Replace(".", "").Replace("-", "").Replace("/", "").Replace("\\", "").Replace("'", "") + ".png"))
+								files.Add(new FileAttachment(Path.GetFullPath(Config.mapFolder + "/" + keyword + ".png")));
 						} else
 							break;
 					} else
 						break;
 				}
+
+				if (files.Count > 0)
+					await context.Channel.SendFilesAsync(files);
 
 				int argPos = 0;
 

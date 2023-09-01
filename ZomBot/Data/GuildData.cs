@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace ZomBot.Data {
 	public class GuildData {
@@ -37,6 +36,8 @@ namespace ZomBot.Data {
 			string pattern = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'";
 
 			DateTimeOffset date = DateTimeOffset.ParseExact(postDate, pattern, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
+
+			//Program.Info($"postdate expected: {date.AddHours(Config.bot.timezone)}");
 			return date.AddHours(Config.bot.timezone);
 		}
 	}

@@ -56,7 +56,7 @@ namespace ZomBot {
 			_client.MessageDeleted += MessageDeleted;
 
 			Timer fiveMinutes = new Timer() {
-				Interval = 60000,
+				Interval = 60000, // actually 1 minute
 				AutoReset = true,
 				Enabled = true
 			};
@@ -318,8 +318,10 @@ namespace ZomBot {
 						foreach (MissionData m in missionList.missions) {
 							bool cont = false;
 							foreach (MissionData saved in g.missions.missions)
-								if (m.id == saved.id)
+								if (m.id == saved.id) {
 									cont = true;
+									break;
+								}
 
 							if (cont)
 								continue;
