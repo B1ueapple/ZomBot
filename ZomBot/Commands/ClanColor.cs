@@ -12,7 +12,12 @@ namespace ZomBot.Commands {
             var guild = Accounts.GetGuild(Context.Guild.Id);
             var user = Accounts.GetUser(Context.User, Context.Guild);
 
-            var result = from c in guild.clanList
+			if ((user.playerData?.name ?? "") == "") {
+				await RespondAsync($":x: You must link your account first.", ephemeral: true);
+				return;
+			}
+
+			var result = from c in guild.clanList
                          where c.clanName.ToLower() == user.playerData.clan.ToLower()
                          select c;
 

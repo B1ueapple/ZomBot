@@ -79,8 +79,8 @@ namespace ZomBot.Data {
                 id = userid,
                 discordUsername = username,
                 playerData = new PlayerData(),
+                extendedPlayerData = null,
                 blacklisted = false,
-                warnings = new List<Warning>(),
                 specialPlayerData = new SpecialPlayerData() {
                     cured = false,
                     isMVZ = false

@@ -11,28 +11,42 @@ namespace ZomBot.Commands {
         [SlashCommand("link", "Link your discord to hvz. You must be registered on the website first.")]
         [RequireContext(ContextType.Guild)]
         public async Task LinkCommand([Summary("Name", "Use your name as spelled on the website. (Not case sensitive)")] string name) {
-            if (Context.Guild is SocketGuild guild) {
-                var ud = Accounts.GetUser(Context.User.Id, guild.Id);
-                // There is absolutely nothing stopping multiple people from linking to the same account.
-                if (!Config.bot.apionline) {
-                    await RespondAsync(":x: Linking is currently disabled.", ephemeral: true);
-                    return;
-				}
+			if (!Config.bot.apionline) {
+				await RespondAsync(":x: Linking is currently disabled.", ephemeral: true);
+				return;
+			}
 
-                if (ud.playerData.name != null) {
+			if (Context.Guild is SocketGuild guild) {
+				var ud = Accounts.GetUser(Context.User.Id, guild.Id);
+
+				if ((ud.playerData?.name ?? "") != "") {
                     if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
-                        await RespondAsync(":x: You are already linked.", ephemeral: true);
+                        await RespondAsync($":x: You are already linked as {ud.playerData.name}.", ephemeral: true);
                         return;
                     }
-                }
+				}
 
-                { // player list check
+				var allUsers = guild.Users;
+
+				{ // player list check
                     var result = from a in Program.GetPDL().players
-                                 where a.name.ToLower().Contains(name.ToLower())
+                                 where a.name.ToLower().Contains(name.Trim().ToLower())
                                  select a;
 
                     var player = result.FirstOrDefault();
                     if (player != null) {
+                        // check to make sure no duplicate players
+                        foreach (SocketGuildUser userToCheck in allUsers) {
+							var checkUser = Accounts.GetUser(userToCheck);
+
+							if ((checkUser.playerData?.name ?? "") != "") {
+								if (checkUser.playerData.name == player.name) {
+									await RespondAsync($":x: {userToCheck.Username} has already linked their account to {player.name}. If you believe this to be an error, please let a mod know.", ephemeral: true);
+									return;
+								}
+                            }
+                        }
+
                         ud.playerData = player;
                         Accounts.SaveAccounts();
 
@@ -58,7 +72,19 @@ namespace ZomBot.Commands {
 
                     var player = result.FirstOrDefault();
                     if (player != null) {
-                        ud.playerData = player;
+						// check to make sure no duplicate players
+						foreach (SocketGuildUser userToCheck in allUsers) {
+							var checkUser = Accounts.GetUser(userToCheck);
+
+							if (checkUser.playerData?.name != null) {
+								if (checkUser.playerData.name == player.name) {
+									await RespondAsync($":x: {userToCheck.Username} has already linked their account to {player.name}. If you believe this to be an error, please let a mod know.", ephemeral: true);
+									return;
+								}
+							}
+						}
+
+						ud.playerData = player;
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted)
@@ -91,16 +117,12 @@ namespace ZomBot.Commands {
 
                 var ud = Accounts.GetUser(user ?? Context.User, guild);
 
-                if (ud.playerData.name != null && ud.playerData.name != "") {
+                if ((ud.playerData?.name ?? "") != "") {
                     Program.Info($"{ud.playerData.name} has unlinked their account.");
-                    PlayerData p = new PlayerData {
-                        name = ""
-                    };
-
-                    ud.playerData = p;
+                    ud.playerData = null;
 
                     await RoleUtils.LeaveTeams(user ?? Context.User, guild);
-                    await RespondAsync($":white_check_mark: You have successfully unlinked {(user != null ? (user.Username + "'s") : "your")} account.", ephemeral: true);
+                    await RespondAsync($":white_check_mark: You have successfully unlinked {(user != null ? (user.Username) : "yourself")}.", ephemeral: true);
                     return;
                 }
 
@@ -121,20 +143,35 @@ namespace ZomBot.Commands {
             if (Context.Guild is SocketGuild guild) {
                 var ud = Accounts.GetUser(user.Id, guild.Id);
 
-                if (ud.playerData.name != null) {
-                    if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
-                        await RespondAsync(":x: They are already linked.", ephemeral: true);
+                if ((ud.playerData?.name ?? "") != "") {
+                    if (ud.playerData.name.ToLower().Contains(name.Trim().ToLower())) {
+                        await RespondAsync($":x: They are already linked to {ud.playerData.name}.", ephemeral: true);
                         return;
                     }
-                }
-                { // player list check
+				}
+
+				var allUsers = guild.Users;
+
+				{ // player list check
                     var result = from a in Program.GetPDL().players
                                  where a.name.ToLower().Contains(name.ToLower())
                                  select a;
 
                     var player = result.FirstOrDefault();
                     if (player != null) {
-                        ud.playerData = player;
+						// check to make sure no duplicate players
+						foreach (SocketGuildUser userToCheck in allUsers) {
+							var checkUser = Accounts.GetUser(userToCheck);
+
+							if ((checkUser.playerData?.name ?? "") != "") {
+								if (checkUser.playerData.name == player.name) {
+									await RespondAsync($":x: {userToCheck.Username} has already linked their account to {player.name}.", ephemeral: true);
+									return;
+								}
+							}
+						}
+
+						ud.playerData = player;
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted) {
@@ -156,7 +193,19 @@ namespace ZomBot.Commands {
 
                     var player = result.FirstOrDefault();
                     if (player != null) {
-                        ud.playerData = player;
+						// check to make sure no duplicate players
+						foreach (SocketGuildUser userToCheck in allUsers) {
+							var checkUser = Accounts.GetUser(userToCheck);
+
+							if (checkUser.playerData?.name != null) {
+								if (checkUser.playerData.name == player.name) {
+									await RespondAsync($":x: {userToCheck.Username} has already linked their account to {player.name}.", ephemeral: true);
+									return;
+								}
+							}
+						}
+
+						ud.playerData = player;
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted)
@@ -262,8 +311,19 @@ namespace ZomBot.Commands {
         [ComponentInteraction("oz_button")]
         public async Task HandleOZButton() {
             var user = Accounts.GetUser(Context.User, Context.Guild);
+            bool zombie = false;
+            var playersToCheck = Program.GetPDL().players;
 
-            if (user?.playerData?.name != null) {
+            if ((playersToCheck?.Count ?? 0) > 0)
+                foreach (var toCheck in playersToCheck)
+                    if (toCheck.team == "zombie") {
+                        zombie = true;
+                        break;
+                    }
+            
+            if (zombie) {
+                await RespondAsync(":x: OZ applications are closed.", ephemeral: true);
+            } else if (user?.playerData?.name != null) {
                 if (!(user?.ozApp.applied ?? false)) {
                     await RespondWithModalAsync<OZModal>("oz_modal");
                 } else {
@@ -285,13 +345,14 @@ namespace ZomBot.Commands {
 
             if (Context.Guild is SocketGuild guild) {
                 var ud = Accounts.GetUser(Context.User.Id, guild.Id);
-                // There is absolutely nothing stopping multiple people from linking to the same account.
-                if (ud.playerData.name != null) {
+                if (ud.playerData?.name != null) {
                     if (ud.playerData.name.ToLower().Contains(name.ToLower())) {
-                        await RespondAsync(":x: You are already linked.", ephemeral: true);
+                        await RespondAsync($":x: You are already linked as {ud.playerData.name}.", ephemeral: true);
                         return;
                     }
                 }
+
+                var allUsers = guild.Users;
 
                 { // player list check
                     var result = from a in Program.GetPDL().players
@@ -300,7 +361,19 @@ namespace ZomBot.Commands {
 
                     var player = result.FirstOrDefault();
                     if (player != null) {
-                        ud.playerData = player;
+						// check to make sure no duplicate players
+						foreach (SocketGuildUser userToCheck in allUsers) {
+							var checkUser = Accounts.GetUser(userToCheck);
+
+							if ((checkUser.playerData?.name ?? "") != "") {
+								if (checkUser.playerData.name == player.name) {
+									await RespondAsync($":x: {userToCheck.Username} has already linked their account to {player.name}. If you believe this to be an error, please let a mod know.", ephemeral: true);
+									return;
+								}
+							}
+						}
+
+						ud.playerData = player;
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted) {
@@ -325,7 +398,19 @@ namespace ZomBot.Commands {
 
                     var player = result.FirstOrDefault();
                     if (player != null) {
-                        ud.playerData = player;
+						// check to make sure no duplicate players
+						foreach (SocketGuildUser userToCheck in allUsers) {
+							var checkUser = Accounts.GetUser(userToCheck);
+
+							if (checkUser.playerData?.name != null) {
+								if (checkUser.playerData.name == player.name) {
+									await RespondAsync($":x: {userToCheck.Username} has already linked their account to {player.name}.", ephemeral: true);
+									return;
+								}
+							}
+						}
+
+						ud.playerData = player;
                         Accounts.SaveAccounts();
 
                         if (!ud.blacklisted)

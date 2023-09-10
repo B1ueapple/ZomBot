@@ -38,19 +38,18 @@ namespace ZomBot.Resources {
 
 			if (context.Guild != null) {
 				if (!acc.blacklisted) {
-					var words = content.ToLower().Split(' ');
-
-					foreach (string word in words) {
-						if (word == "gun") {
-							await context.Message.ReplyAsync("UwU You thought you could escape? Gotta say Blasters here too, buckaroo.");
-							return;
-						}
+					if (content.ToLower().Contains("gun")) {
+						await context.Message.ReplyAsync("UwU You thought you could escape? Gotta say Blasters here too, buckaroo.");
+						return;
 					}
 				}
 
 				int index = 0;
 				List<FileAttachment> files = new List<FileAttachment>();
 				while (index < content.Length) {
+					if (files.Count >= 10)
+						break;
+
 					string current = content.Substring(index);
 
 					if (current.Contains("[[")) {

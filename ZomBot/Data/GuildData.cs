@@ -37,8 +37,7 @@ namespace ZomBot.Data {
 
 			DateTimeOffset date = DateTimeOffset.ParseExact(postDate, pattern, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None);
 
-			//Program.Info($"postdate expected: {date.AddHours(Config.bot.timezone)}");
-			return date.AddHours(Config.bot.timezone);
+			return date.AddHours(date.Offset.TotalHours);
 		}
 	}
 

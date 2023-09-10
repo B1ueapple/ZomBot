@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
@@ -19,6 +20,9 @@ namespace ZomBot {
 		private static PlayerDataList playerDataList;
 		private static ModDataList modDataList;
 		private static MissionList missionList;
+
+		public static bool websiteDown = false;
+		public static bool overrideCheck = false;
 
 		static void Main(string[] args) => new Program().StartAsync().GetAwaiter().GetResult();
 
@@ -55,16 +59,15 @@ namespace ZomBot {
 			_client.MessageUpdated += MessageUpdated;
 			_client.MessageDeleted += MessageDeleted;
 
-			Timer fiveMinutes = new Timer() {
-				Interval = 60000, // actually 1 minute
+			Timer t = new Timer() {
+				Interval = 60000, // 1 minute
 				AutoReset = true,
 				Enabled = true
 			};
 
 			if (Config.bot.apionline && Config.bot.apikey != "") {
-				Log("API ONLINE");
-				Log($"TIMEZONE: {Config.bot.timezone}");
-				fiveMinutes.Elapsed += UpdatePlayers;
+				Info("API ONLINE");
+				t.Elapsed += UpdatePlayers;
 
 				try {
 					GetSiteData();
@@ -73,7 +76,7 @@ namespace ZomBot {
 				};
 			} else {
 				await _client.SetGameAsync($"with myself...", null, ActivityType.Playing);
-				Log("API OFFLINE");
+				Info("API OFFLINE");
 			}
 
 			await Task.Delay(-1);
@@ -112,7 +115,7 @@ namespace ZomBot {
 
 						await logTextChannel.SendMessageAsync(embed: embed.Build());
 					} catch {
-						Log("Couldn't log MessageDelete");
+						Error("Couldn't log MessageDelete");
 					}
 				}
 			}
@@ -120,7 +123,7 @@ namespace ZomBot {
 
 		private async Task MessageUpdated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channel) {
 			if (before.HasValue && after != null) {
-				if (before.Value.Author.IsBot || (before.Value?.CleanContent?.Trim() ?? "") == "")
+				if ((before.Value?.Author?.IsBot ?? false) || (before.Value?.CleanContent?.Trim() ?? "") == "")
 					return;
 
 				if (before.Value.CleanContent != after.CleanContent) {
@@ -146,15 +149,53 @@ namespace ZomBot {
 						try {
 							EmbedBuilder embed = new EmbedBuilder();
 
+							var b = before.Value.CleanContent ?? "";
+							var a = after.CleanContent ?? "";
+
+							var bButSplit = b.Split(' ');
+							var aButSplit = a.Split(' ');
+
+							bool changed = false;
+
+							if ((aButSplit?.Length ?? 0) > 0 && (bButSplit?.Length ?? 0) > 0) { // make sure no messages are empty
+								for (int i = 0; i < bButSplit.Length; i++) {
+									if (i >= aButSplit.Length) // after is shorter than before, avoid array index out of bounds
+										break;
+										
+									if (bButSplit[i] == aButSplit[i]) {
+										if (changed) {
+											aButSplit[i - 1] = $"{aButSplit[i - 1]}**";
+											changed = false;
+										}
+									} else {
+										if (!changed) {
+											aButSplit[i] = $"**{aButSplit[i]}";
+											changed = true;
+										}
+									}
+								}
+
+								if (aButSplit.Length > bButSplit.Length) { // after is longer than before
+									if (!changed) { // no ongoing boldening, so we start at then end of before
+										aButSplit[bButSplit.Length] = $"**{aButSplit[bButSplit.Length]}";
+										changed = true;
+									}
+								}
+							}
+
+							var aAfterBolding = string.Join(" ", aButSplit);
+							if (changed)
+								aAfterBolding += "**"; // tie up loose ends
+
 							embed.WithAuthor(after.Author)
-									.WithCurrentTimestamp()
-									.AddField($"Updated in: #{channel.Name}", (before.Value.CleanContent ?? "") == "" ? "no text" : before.Value.CleanContent)
-									.AddField("Changed to", (after.CleanContent ?? "") == "" ? "no text" : after.CleanContent)
-									.WithCurrentTimestamp();
+								.WithCurrentTimestamp()
+								.AddField($"Updated in: #{channel.Name}", b == "" ? "no text" : b)
+								.AddField("Changed to", aAfterBolding == "" ? "no text" : aAfterBolding)
+								.WithCurrentTimestamp();
 
 							await logTextChannel.SendMessageAsync(embed: embed.Build());
 						} catch {
-							Log("Couldn't log MessageUpdated");
+							Error("Couldn't log MessageUpdated");
 						}
 					}
 				}
@@ -183,9 +224,17 @@ namespace ZomBot {
 					rawPlayerData = client.DownloadString($"{Config.bot.hvzwebsite}/api/v2/status/players");
 					rawModData = client.DownloadString($"{Config.bot.hvzwebsite}/api/v2/status/moderators");
 					rawMissionData = client.DownloadString($"{Config.bot.hvzwebsite}/api/v2/admin/missions?apikey={Config.bot.apikey}");
+					
+					if (websiteDown) {
+						websiteDown = false;
+						Info("Website back online.");
+					}
 				} catch (WebException) {
-					Log($"Could not retieve data from {Config.bot.hvzwebsite}");
-					throw new Exception($"Could not retieve data from {Config.bot.hvzwebsite}");
+					if (!websiteDown) {
+						websiteDown = true;
+						Warning($"Could not retieve data from {Config.bot.hvzwebsite}");
+						throw new Exception($"Could not retieve data from {Config.bot.hvzwebsite}");
+					}
 				}
 			}
 
@@ -193,7 +242,6 @@ namespace ZomBot {
 			modDataList = JsonConvert.DeserializeObject<ModDataList>(rawModData);
 			missionList = JsonConvert.DeserializeObject<MissionList>(rawMissionData);
 		}
-
 		private async void UpdatePlayers(object sender, ElapsedEventArgs e) {
 			try {
 				GetSiteData();
@@ -230,10 +278,10 @@ namespace ZomBot {
 							if (u.blacklisted)
 								continue;
 
-							if (u.playerData.name != null && u.playerData.name != "") { // iterate through non-mod players
-								foreach (PlayerData player in playerDataList.players) {
+							if ((u.playerData?.name ?? "") != "") { // player is in fact linked
+								foreach (PlayerData player in playerDataList.players) { // iterate through non-mod players
 									if (u.playerData.id == player.id) { // found player
-										if (u.playerData.team == player.team && player.team == "human" && u.playerData.clan == player.clan)
+										if (!overrideCheck && u.playerData.team == player.team && player.team == "human" && u.playerData.clan == player.clan && u.playerData.access == player.access)
 												break; // nothing changed, continue to next user
 
 										bool updated = false;
@@ -309,6 +357,11 @@ namespace ZomBot {
 								}
 							}
 						}
+
+						if (overrideCheck) {
+							overrideCheck = false;
+							Info("Finished overrideCheck!");
+						}
 					}
 
 					if (g.missions.missions == null)
@@ -335,25 +388,19 @@ namespace ZomBot {
 								var humanAnnouncementChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.HUMANANNOUNCEMENT) ?? 0);
 
 								if (humanAnnouncementChannel != null) {
-									await humanAnnouncementChannel.SendMessageAsync($"**{m.title}**");
-									await humanAnnouncementChannel.SendMessageAsync(b);
-									await humanAnnouncementChannel.SendMessageAsync(guild.GetRole(g.roleIDs.human).Mention);
+									await humanAnnouncementChannel.SendMessageAsync($"# {m.title} #\n{b}\n" + guild.GetRole(g.roleIDs.human).Mention);
 								}
 							} else if (m.team == "zombie") {
 								var zombieAnnouncementChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.ZOMBIEANNOUNCEMENT) ?? 0);
 
 								if (zombieAnnouncementChannel != null) {
-									await zombieAnnouncementChannel.SendMessageAsync($"**{m.title}**");
-									await zombieAnnouncementChannel.SendMessageAsync(b);
-									await zombieAnnouncementChannel.SendMessageAsync(guild.GetRole(g.roleIDs.zombie).Mention);
+									await zombieAnnouncementChannel.SendMessageAsync($"# {m.title} #\n{b}\n" + guild.GetRole(g.roleIDs.zombie).Mention);
 								}
 							} else if (m.team == "all") {
 								var sharedAnnouncementChannel = guild.GetTextChannel(g.channels.GetFirstChannelByType(ChannelDesignation.SHAREDANNOUNCEMENT) ?? 0);
 
 								if (sharedAnnouncementChannel != null) {
-									await sharedAnnouncementChannel.SendMessageAsync($"**{m.title}**");
-									await sharedAnnouncementChannel.SendMessageAsync(b);
-									await sharedAnnouncementChannel.SendMessageAsync(guild.GetRole(g.roleIDs.player).Mention);
+									await sharedAnnouncementChannel.SendMessageAsync($"# {m.title} #\n{b}\n" + guild.GetRole(g.roleIDs.player).Mention);
 								}
 							}
 
@@ -361,7 +408,8 @@ namespace ZomBot {
 								id = m.id,
 								team = m.team,
 								title = m.title,
-								body = b
+								body = b,
+								postDate = m.GetPostDate().ToString()
 							};
 
 							g.missions.missions.Add(d);
@@ -431,3 +479,7 @@ namespace ZomBot {
 		public List<PlayerData> players;
 	}
 }
+
+// convert linking as a mod to require the human/zombie id of that person
+// make human/zombie id accessible in discord
+// add badges to discord?

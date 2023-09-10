@@ -25,8 +25,7 @@ namespace ZomBot.Data {
                     apionline = false,
                     apikey = "",
                     hvzwebsite = "",
-                    token = "insert bot token here",
-                    timezone = 0
+                    token = "insert bot token here"
                 };
 
                 string json = JsonConvert.SerializeObject(bot, Formatting.Indented);

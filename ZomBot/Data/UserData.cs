@@ -6,28 +6,10 @@ namespace ZomBot.Data {
 		public ulong id;
 		public string discordUsername;
 		public PlayerData playerData;
+		public ExtendedPlayerData extendedPlayerData;
 		public bool blacklisted;
-		public List<Warning> warnings;
 		public SpecialPlayerData specialPlayerData;
 		public OZApplication ozApp;
-
-		public void AddWarning(IUser issuer, string reason) {
-			if (blacklisted)
-				return;
-
-			var time = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-			if (warnings == null)
-				warnings = new List<Warning>();
-
-			Warning warning = new Warning() {
-				issuer = issuer.Id,
-				reason = reason,
-				time = time
-			};
-			warnings.Add(warning);
-			Accounts.SaveAccounts();
-		}
 	}
 
 	public struct SpecialPlayerData {
@@ -44,10 +26,19 @@ namespace ZomBot.Data {
 		public int humansTagged;
 	}
 
-	public struct Warning {
-		public ulong issuer;
-		public string reason;
-		public long time;
+	public class ExtendedPlayerData { // cannot be changed - based on website api
+		public string zombieId;
+		public bool oz;
+		public List<HumanID> humanIds;
+	}
+
+	public class HumanID { // cannot be changed - based on website api
+		public string idString;
+		public bool active;
+	}
+
+	public class EPDReturn { // cannot be changed - based on website api
+		public ExtendedPlayerData user;
 	}
 
 	public struct OZApplication {

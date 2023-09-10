@@ -221,7 +221,6 @@
     <Compile Include="Commands\Link.cs" />
     <Compile Include="Commands\Refresh.cs" />
     <Compile Include="Commands\Status.cs" />
-    <Compile Include="Commands\Warn.cs" />
     <Compile Include="Commands\WhoIs.cs" />
     <Compile Include="Data\ChannelList.cs" />
     <Compile Include="Data\ChatLog.cs" />
