@@ -344,7 +344,7 @@ namespace ZomBot {
 
 								foreach (PlayerData mod in modDataList.players) { // iterate through mods
 									if (u.playerData.id == mod.id) {
-										if (u.playerData.team == mod.team)
+										if (u.playerData.access == mod.access)
 											break;
 
 										updatedPlayers++;
