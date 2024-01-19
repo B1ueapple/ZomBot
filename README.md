@@ -14,15 +14,13 @@ Discord bot for running an HVZ Discord server.
 - `/channels {mode} [type]` - Register the current channel as a specific game channel. **Requires 'Manage Channels' permission on Discord**
 - `/checklinked` - List all linked and unlinked players. **Requires 'Manage Roles' permission on Discord**
 - `/clancolor {r} {g} {b}` - Change the color of your clan role.
-- `/endgame` - End the game. (Doesn't affect the website) **Requires 'Manage Guild' permission on Discord**
+- `/endgame` - Update server to reflect the game ending. (Doesn't affect the website) **Requires 'Manage Guild' permission on Discord**
 - `/find {name}` - Find a player's discord by their hvz name.
 - `/link {name}` - Link your discord to hvz. You must be registered on the website first.
-- `/linkbutton` - Send a "Link Account" button in the channel. Clicking the button opens a window to make linking accounts easier. **Requires 'Manage Roles' permission on Discord**
+- `/linkbutton` - Send a "Link Account" and "OZ Applicaiton" button in the channel. Clicking the button opens a window to make linking accounts or applying for OZ easier. **Requires 'Manage Roles' permission on Discord**
 - `/linkother {user} {name}` - Link someone's discord to hvz. They must be registered on the website first. **Requires 'Manage Roles' permission on Discord**
-- `/startgame` - Start the game. (Doesn't affect the website) **Requires 'Manage Guild' permission on Discord** 
-- `/status [user]` - See a player's hvz related information.
+- `/status [user]` - See a player's hvz related information. Mods also see their zombie ID and human IDs.
 - `/unlink [other user]` - Unlink [your] discord from hvz. Does nothing if you aren't currently linked. **Requires 'Manage Roles' permission on Discord to unlink others**
-- `/warn {user} {reason}` - Warn a user. **Requires 'Kick Members' permission on Discord**
 - `/whois {user}` - Check a player's name.
 
 ### Passive Functions
